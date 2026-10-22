@@ -1,0 +1,10 @@
+{
+  "name": "suspiciousdog",
+  "version": "0.1.0",
+  "description": "Sniffs your Claude Code transcripts for what actually works: which agent habits get pushback, deferrals, interruptions. Counts, tests, and the real turns behind every number.",
+  "author": { "name": "Saturday Company", "url": "https://saturdaycompany.it" },
+  "homepage": "https://github.com/Saturday-Company/SuspiciousDog",
+  "repository": "https://github.com/Saturday-Company/SuspiciousDog",
+  "license": "MIT",
+  "keywords": ["transcripts", "evals", "agents", "analytics", "privacy"]
+}

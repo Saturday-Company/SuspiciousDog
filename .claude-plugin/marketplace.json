@@ -1,0 +1,12 @@
+{
+  "name": "suspiciousdog",
+  "description": "SuspiciousDog by Saturday Company",
+  "owner": { "name": "Saturday Company", "url": "https://saturdaycompany.it" },
+  "plugins": [
+    {
+      "name": "suspiciousdog",
+      "source": "./",
+      "description": "Sniffs your agent transcripts for what actually works."
+    }
+  ]
+}

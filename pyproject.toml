@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "suspiciousdog"
+version = "0.1.0"
+description = "Sniffs your AI agent transcripts for what actually works. Claude Code, Codex, Gemini CLI, Aider, or anything in the open format."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Saturday Company" }]
+keywords = ["ai", "agents", "claude-code", "codex", "gemini-cli", "aider", "transcripts", "evals"]
+classifiers = ["Programming Language :: Python :: 3", "Environment :: Console", "Topic :: Software Development"]
+
+[project.urls]
+Homepage = "https://github.com/Saturday-Company/SuspiciousDog"
+Issues = "https://github.com/Saturday-Company/SuspiciousDog/issues"
+
+[project.scripts]
+sdog = "suspiciousdog.cli:main"
+suspiciousdog = "suspiciousdog.cli:main"
+
+[tool.setuptools]
+packages = ["suspiciousdog", "suspiciousdog.adapters"]

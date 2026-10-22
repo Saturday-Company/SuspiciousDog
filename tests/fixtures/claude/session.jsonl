@@ -1,0 +1,12 @@
+{"type":"user","message":{"role":"user","content":"fix the login form"},"timestamp":"2026-10-20T09:00:00Z","cwd":"/code/shop"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"t1","name":"Read","input":{"file_path":"/code/shop/login.py"}}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"def login(email): ..."}]}}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"t2","name":"Edit","input":{"file_path":"/code/shop/login.py","old_string":"def login(email): ...","new_string":"def login(email):\n    if not email:\n        raise ValueError"}}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t2","content":"ok"}]}}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Fixed: empty emails are rejected. Shall I also add a test?"}]}}
+{"type":"user","message":{"role":"user","content":"not now, later"},"timestamp":"2026-10-20T09:05:00Z"}
+{"type":"assistant","message":{"role":"assistant","content":[{"type":"tool_use","id":"t3","name":"Bash","input":{"command":"pytest -q"}}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t3","content":"1 failed","is_error":true}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"text","text":"[Request interrupted by user]"}]}}
+{"type":"user","message":{"role":"user","content":"no, that's not what I asked"},"timestamp":"2026-10-20T09:07:00Z"}
+{"type":"assistant","isSidechain":true,"message":{"role":"assistant","content":[{"type":"text","text":"subagent noise"}]}}

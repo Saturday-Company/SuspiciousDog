@@ -1,0 +1,7 @@
+{
+ "command": "sdog provenance --history",
+ "sessions": 372,
+ "names": 90101,
+ "green": {"names": 70857, "then_failed": 95},
+ "red": {"names": 19244, "then_failed": 14}
+}

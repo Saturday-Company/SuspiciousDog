@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <title>SuspiciousDog</title>
+  <defs>
+    <filter id="ink" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="4"/>
+      <feDisplacementMap in="SourceGraphic" scale="7" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <g filter="url(#ink)" stroke="#f2f2f2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M300 124 C384 122 446 180 452 270 C456 330 440 372 430 404 C414 460 364 504 300 506 C236 504 186 460 170 404 C160 372 144 330 148 270 C154 180 216 126 300 124 Z"
+          fill="#0d1117" stroke-width="15"/>
+    <path d="M214 150 C158 132 104 160 86 236 C72 300 88 356 120 372 C142 338 150 282 162 236 C170 204 186 176 214 150 Z" fill="#f2f2f2"/>
+    <path d="M386 150 C442 132 496 160 514 236 C528 300 512 356 480 372 C458 338 450 282 438 236 C430 204 414 176 386 150 Z" fill="#f2f2f2"/>
+    <path d="M186 238 C214 246 246 252 274 256" fill="none" stroke-width="14"/>
+    <path d="M330 236 C352 214 388 212 414 226" fill="none" stroke-width="14"/>
+    <path d="M194 284 L276 279 C274 306 254 318 236 318 C214 318 196 306 194 284 Z" fill="#0d1117" stroke-width="10"/>
+    <path d="M326 281 L408 276 C406 303 386 315 368 315 C346 315 328 303 326 281 Z" fill="#0d1117" stroke-width="10"/>
+    <circle cx="261" cy="296" r="11" fill="#f2f2f2" stroke="none"/>
+    <circle cx="393" cy="293" r="11" fill="#f2f2f2" stroke="none"/>
+    <path d="M226 352 C230 412 268 448 300 448 C334 448 370 412 374 352" fill="none" stroke-width="9"/>
+    <path d="M270 344 C278 330 322 330 330 344 C334 358 314 372 300 372 C286 372 266 358 270 344 Z" fill="#f2f2f2"/>
+    <path d="M300 372 L300 396" fill="none" stroke-width="8"/>
+    <path d="M266 408 C284 404 318 404 336 407" fill="none" stroke-width="9"/>
+  </g>
+  <g fill="#f2f2f2" filter="url(#ink)">
+    <circle cx="237" cy="413" r="2"/> <circle cx="298" cy="422" r="2.6"/> <circle cx="251" cy="377" r="2.6"/> <circle cx="306" cy="422" r="3.2"/> <circle cx="332" cy="381" r="2.6"/> <circle cx="280" cy="419" r="2"/> <circle cx="350" cy="400" r="2"/> <circle cx="349" cy="411" r="3.2"/> <circle cx="234" cy="377" r="2"/> <circle cx="319" cy="440" r="2.6"/> <circle cx="332" cy="412" r="2.6"/> <circle cx="295" cy="409" r="3.2"/> <circle cx="334" cy="374" r="3.2"/> <circle cx="244" cy="374" r="3.2"/> <circle cx="247" cy="425" r="3.2"/> <circle cx="357" cy="389" r="2"/> <circle cx="315" cy="407" r="2.6"/> <circle cx="322" cy="402" r="2"/> <circle cx="276" cy="417" r="2"/> <circle cx="318" cy="427" r="2"/> <circle cx="352" cy="398" r="3.2"/> <circle cx="357" cy="386" r="2"/> <circle cx="300" cy="429" r="2"/>
+    <ellipse cx="521" cy="286" rx="2.2" ry="1.6"/> <ellipse cx="452" cy="82" rx="3" ry="2.1"/> <ellipse cx="320" cy="520" rx="1.6" ry="1.6"/> <ellipse cx="364" cy="487" rx="1.6" ry="1.0"/> <ellipse cx="139" cy="163" rx="1.6" ry="1.8"/> <ellipse cx="142" cy="159" rx="3" ry="2.8"/> <ellipse cx="185" cy="579" rx="1.6" ry="1.8"/> <ellipse cx="190" cy="69" rx="1.6" ry="1.4"/> <ellipse cx="480" cy="243" rx="1.6" ry="1.9"/> <ellipse cx="40" cy="145" rx="1.6" ry="1.5"/> <ellipse cx="550" cy="249" rx="1.6" ry="1.6"/> <ellipse cx="143" cy="401" rx="3" ry="2.0"/> <ellipse cx="213" cy="560" rx="1.6" ry="1.1"/> <ellipse cx="408" cy="36" rx="4.2" ry="4.9"/> <ellipse cx="132" cy="338" rx="4.2" ry="4.0"/> <ellipse cx="552" cy="453" rx="4.2" ry="4.4"/> <ellipse cx="101" cy="261" rx="2.2" ry="1.3"/> <ellipse cx="489" cy="566" rx="3" ry="3.9"/> <ellipse cx="50" cy="133" rx="1.6" ry="1.0"/> <ellipse cx="116" cy="273" rx="1.6" ry="1.8"/> <ellipse cx="78" cy="80" rx="2.2" ry="1.3"/> <ellipse cx="106" cy="353" rx="2.2" ry="2.7"/> <ellipse cx="135" cy="115" rx="2.2" ry="2.6"/> <ellipse cx="170" cy="134" rx="2.2" ry="2.4"/> <ellipse cx="81" cy="56" rx="1.6" ry="1.0"/> <ellipse cx="541" cy="161" rx="4.2" ry="3.3"/> <ellipse cx="468" cy="358" rx="3" ry="2.9"/> <ellipse cx="523" cy="567" rx="2.2" ry="1.7"/> <ellipse cx="331" cy="499" rx="1.6" ry="1.3"/> <ellipse cx="517" cy="142" rx="1.6" ry="1.0"/> <ellipse cx="64" cy="185" rx="2.2" ry="1.5"/> <ellipse cx="112" cy="278" rx="3" ry="3.2"/> <ellipse cx="113" cy="49" rx="1.6" ry="1.5"/>
+  </g>
+</svg>

@@ -1,0 +1,34 @@
+<svg viewBox="0 0 900 592" xmlns="http://www.w3.org/2000/svg">
+<title>sdog demo, on synthetic sessions</title>
+<rect width="900" height="592" rx="10" fill="#0d1117"/>
+<circle cx="22" cy="20" r="6" fill="#ff5f56"/><circle cx="42" cy="20" r="6" fill="#ffbd2e"/><circle cx="62" cy="20" r="6" fill="#27c93f"/>
+<text x="450.0" y="24" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="12" fill="#8b949e" text-anchor="middle">$ sdog demo</text>
+<text x="18" y="54" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"></text>
+<text x="18" y="73" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">     /^-----^\</tspan></text>
+<text x="18" y="92" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">    ( ◔    ◔ )     SuspiciousDog v0.1.0</tspan></text>
+<text x="18" y="111" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">     \  ▼  /       Sniffed 1033 turns from 300 sessions (jsonl 300).</tspan></text>
+<text x="18" y="130" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">      `---&#x27;        </tspan><tspan fill="#d2a8ff">SYNTHETIC DATA. Made up for the demo. Nobody typed this.</tspan></text>
+<text x="18" y="149" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"></text>
+<text x="18" y="168" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">  pushback · 3.6% of turns</tspan></text>
+<text x="18" y="187" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">    3+ tool errors                              92 turns    7.6% vs   3.2%    2.4×  </tspan><tspan fill="#d29922">maybe</tspan></text>
+<text x="18" y="206" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"></text>
+<text x="18" y="225" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">  deferral · 2.3% of turns</tspan></text>
+<text x="18" y="244" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">    ends offering more work                     75 turns   12.0% vs   1.6%    7.7×  </tspan><tspan fill="#2da44e">real</tspan></text>
+<text x="18" y="263" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">    ends with a question                       157 turns    5.7% vs   1.7%    3.3×  </tspan><tspan fill="#d29922">maybe</tspan></text>
+<text x="18" y="282" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"></text>
+<text x="18" y="301" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">  interruption · 0.4% of turns</tspan></text>
+<text x="18" y="320" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">    40+ tool calls                             196 turns    2.0% vs   0.0%       ∞  </tspan><tspan fill="#2da44e">real</tspan></text>
+<text x="18" y="339" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">    3+ tool errors                              92 turns    2.2% vs   0.2%   10.2×  </tspan><tspan fill="#d29922">maybe</tspan></text>
+<text x="18" y="358" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">    checks the result after the last edit      476 turns    0.8% vs   0.0%       ∞  </tspan><tspan fill="#d29922">maybe</tspan></text>
+<text x="18" y="377" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"></text>
+<text x="18" y="396" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">  quick yes · 13.0% of turns</tspan></text>
+<text x="18" y="415" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">    ends offering more work                     75 turns   32.0% vs  11.5%    2.8×  </tspan><tspan fill="#2da44e">real</tspan></text>
+<text x="18" y="434" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">    ends with a question                       157 turns   22.9% vs  11.2%    2.0×  </tspan><tspan fill="#2da44e">real</tspan></text>
+<text x="18" y="453" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">    40+ tool calls                             196 turns    8.2% vs  14.1%    0.6×  </tspan><tspan fill="#d29922">maybe</tspan></text>
+<text x="18" y="472" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"></text>
+<text x="18" y="491" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">  </tspan><tspan fill="#2da44e">real</tspan><tspan fill="#c9d1d9"> = survives the correction for 52 tests (q &lt; 0.05). </tspan><tspan fill="#d29922">maybe</tspan><tspan fill="#c9d1d9"> = p &lt; 0.05 alone. </tspan><tspan fill="#6e7681">vibes</tspan><tspan fill="#c9d1d9"> = </tspan><tspan fill="#6e7681">vibes</tspan><tspan fill="#c9d1d9">.</tspan></text>
+<text x="18" y="510" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"></text>
+<text x="18" y="529" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">  4 findings. Everything else is </tspan><tspan fill="#6e7681">vibes</tspan><tspan fill="#c9d1d9">.</tspan></text>
+<text x="18" y="548" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">  Look before you believe:  sdog show &quot;ends offering more work&quot; --outcome deferral</tspan></text>
+<text x="18" y="567" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" xml:space="preserve"><tspan fill="#c9d1d9">  Help the pack (counts only, never text):  sdog share</tspan></text>
+</svg>
