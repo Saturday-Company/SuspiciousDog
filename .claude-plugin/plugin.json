@@ -1,7 +1,7 @@
 {
   "name": "suspiciousdog",
-  "version": "0.2.0b1",
-  "description": "Checks the bets in your agent setup: what every plugin, skill, MCP server and CLAUDE.md costs in context, how often it's used, why it fails, and whether changes helped. Prunes on your yes, with an undo. Local only.",
+  "version": "0.2.0",
+  "description": "Checks the bets in your agent setup: what every plugin, skill, MCP server and CLAUDE.md costs in context, how often it's used, why it fails, and whether changes helped. Checks a rule against your sessions before you add it. Prunes on your yes, with an undo. Local only.",
   "author": {
     "name": "Saturday Company",
     "url": "https://saturdaycompany.it"

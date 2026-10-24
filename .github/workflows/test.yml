@@ -14,4 +14,7 @@ jobs:
       - run: python -m unittest discover -s tests -t . -v
       - run: python -m suspiciousdog demo
       - run: python -m suspiciousdog kit --path tests/fixtures/kit --no-cache
+      - run: python -m suspiciousdog kit --path tests/fixtures/kit-other --no-cache --all
+      - run: python -m suspiciousdog check "Never push to main without asking" --path tests/fixtures/kit
+      - run: echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python -m suspiciousdog mcp
       - run: python -m suspiciousdog doctor

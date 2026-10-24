@@ -12,7 +12,8 @@ Without installing: `git clone https://github.com/Saturday-Company/SuspiciousDog
 
 ## Claude Code
 
-As a plugin (adds `/suspiciousdog:sniff` and a skill Claude uses when you ask whether something helps):
+As a plugin (adds `/suspiciousdog:sniff`, a skill Claude uses when you ask whether something helps, and the MCP
+server with `audit_setup`, `check_rule` and `evidence`):
 
 ```bash
 claude plugin marketplace add Saturday-Company/SuspiciousDog
@@ -24,10 +25,14 @@ Inside a session the same is `/plugin marketplace add Saturday-Company/Suspiciou
 
 Sessions are read from `~/.claude/projects` (or `$CLAUDE_CONFIG_DIR/projects`).
 
+Without the plugin, the MCP server is one command: `claude mcp add suspiciousdog -s user -- sdog mcp`. The two
+optional hooks: `sdog hooks on brief`, `sdog hooks on sentinel`.
+
 ## Codex CLI
 
 Install with pipx, then copy `AGENTS.md` into your project (or append it to yours) so Codex knows how to run and
-read it. To use it as a skill, copy `skills/suspiciousdog/` into your Codex skills folder.
+read it. To use it as a skill, copy `skills/suspiciousdog/` into `~/.agents/skills/`. The MCP server:
+`codex mcp add suspiciousdog -- sdog mcp`.
 
 Sessions are read from `~/.codex/sessions` and `~/.codex/archived_sessions` (or `$CODEX_HOME`). Compressed
 rollouts (`.jsonl.zst`) are not read yet.
@@ -35,7 +40,7 @@ rollouts (`.jsonl.zst`) are not read yet.
 ## Gemini CLI
 
 Install with pipx, then add the contents of `AGENTS.md` to your `GEMINI.md`, or copy `skills/suspiciousdog/` into
-your Gemini skills folder.
+your Gemini skills folder. The MCP server: `gemini mcp add -s user suspiciousdog sdog mcp`.
 
 Sessions are read from `~/.gemini/tmp/*/chats/` (or `$GEMINI_CLI_HOME/.gemini`).
 
@@ -48,6 +53,6 @@ night and error factors are rough for it.
 ## Cursor, OpenCode, Windsurf, Cline, Copilot and the rest
 
 Install with pipx and add `AGENTS.md` to your rules. Their sessions aren't read directly yet: convert them to the
-open format (`sdog format` prints it, six kinds of JSON lines) and run `sdog sniff --path your-folder`. Put them in
+open format (`sdog format` prints it, six kinds of JSON lines, plus `loaded` and `usage` for the kit) and run `sdog sniff --path your-folder`. Put them in
 `~/.suspiciousdog/sessions/` and they're picked up automatically. A reader for your agent is a welcome PR: one file
 in `suspiciousdog/adapters/`.

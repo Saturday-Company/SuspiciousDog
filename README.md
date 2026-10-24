@@ -20,7 +20,7 @@
 <p align="center"><a href="README.it.md">Italiano</a></p>
 
 <p align="center">
-  <img src="assets/hypotheses.svg" alt="Three ideas tested on 1,009 real turns: two died, one is hanging on at q = 0.065" width="820">
+  <img src="assets/hypotheses.svg" alt="Three ideas tested on 1,009 real turns: all three died" width="820">
 </p>
 
 Every plugin, skill, hook and line of `CLAUDE.md` or `AGENTS.md` you give an AI agent is a hypothesis:
@@ -55,9 +55,17 @@ we have. The one that survived, survived by a whisker.
 
 **A day later it didn't.** Three more offers on 24/10, none turned down: 7 in 52, q = 0.065. Back to *maybe*. The
 complaint outcome added in 0.2 says the same thing louder: of 52 offers, 0 drew a complaint. People say "later" to
-them, not "wrong". One developer's whisker is not a finding. (The chart at the top is the 24/10 count.)
+them, not "wrong". One developer's whisker is not a finding. (The chart at the top is the 24/10 count; its third card is read by a model, see below.)
 
-That's one developer. Effects that small need more than one developer to be sure. **That's where you come in.**
+**Then a model read the replies.** The patterns that recognise "pushback" are cheap and a little dim: to them,
+*"no, later"* reads like a complaint. In 0.2 a small model can read the replies instead (`sdog classify`, off unless
+you run it). On 80 replies we labelled by hand it got 77 right; the patterns got 58. Read by Haiku, the offer of more
+work isn't a bad habit at all: it gets a quick yes 40% of the time against 23%, and a plain no 7.7% against 1.4%.
+Ending with a question does the same, more clearly: a yes 43% against 22%, a no 6.7% against 1.1%, both real.
+Questions get answered, that's all. Our one surviving idea was the patterns misreading "no".
+
+Three ideas, three wrong. That's one developer, and effects this small need more than one developer to be sure.
+**That's where you come in.**
 
 ## Help the pack
 
@@ -73,11 +81,13 @@ this, and only this:
 | which agents, how many sessions | your prompts, your agent's replies |
 | how many turns, over how many days | file names, paths, project names |
 | for each factor × outcome: four integers | code, commands, anything you typed |
+| for public plugins, MCP servers and built-in tools: sessions loaded, used, calls, failures, weight | your own skills, private plugins, connectors you named, your CLAUDE.md: those are one number, "private items" |
 
-The factor names come from SuspiciousDog's own list, and a test fails the build if anything else could get in
-([PRIVACY.md](PRIVACY.md)). Every shared result is public, so the dataset belongs to everyone who adds to it. We'll
-publish what it shows: which agent habits get pushed back on, on which agents, and whether the popular plugins
-move anything at all.
+The factor names come from SuspiciousDog's own list, public names from fixed lists, and a test fails the build if
+anything else could get in ([PRIVACY.md](PRIVACY.md)). Every shared result is public, so the dataset belongs to
+everyone who adds to it. A GitHub Action adds the shares up into the pack page, which goes live with the first
+shares: which agent habits go with worse answers, on which agents, and for every public plugin and MCP server how
+often people who load it actually use it, and how often it fails. Marketplaces show stars. This shows use.
 
 ## Ten seconds
 
@@ -95,8 +105,8 @@ correction for every test he ran. `maybe` is a lead. `vibes` is vibes.
 
 ## Your kit
 
-*New in 0.2, Claude Code only for now.* Every plugin, skill, MCP server and line of CLAUDE.md you add was a bet.
-He checks the bets.
+*New in 0.2.* Every plugin, skill, MCP server and line of CLAUDE.md you add was a bet. He checks the bets. Claude
+Code records the most; Codex, Gemini CLI and Aider record less, and `sdog doctor` says what each one can't show.
 
 ```bash
 sdog                # the checkup: one screen, what weighs, what fails, what changed, what the agent keeps doing
@@ -126,11 +136,16 @@ sdog undo           # put the last one back
 sdog journal        # everything changed or noted, and what happened after
 ```
 
-He proposes, you pick. What he can do himself goes through Claude Code's own commands (`claude plugin disable`,
-`claude mcp remove`) or moves a skill into an attic, or into the one project that uses it. Every change goes into a
+He proposes, you pick. What he can do himself goes through the agent's own commands (`claude plugin disable`,
+`claude mcp remove`, `gemini mcp disable`) or moves a skill into an attic, or into the one project that uses it.
+Something you use now and then that costs under 100 tokens a session he leaves alone: a skill you need once a month
+is worth its line. Every change goes into a
 journal with its undo. Connectors and skills that live on claude.ai he can't touch: he tells you where to click,
 and `sdog note "disconnected Gamma"` puts it in the journal. Two weeks later `sdog journal` says whether anything got
-worse.
+worse, and how much lighter the start of a session really got, measured from the API usage, not estimated.
+
+We ran it on ourselves on 24/10: a video plugin used in 3 sessions out of 260 (~2,800 tokens each time), its
+companion skill, and a 3D skill nobody had ever called. Three lines in the journal. We'll report what they did.
 
 ### When it changed, and what it did
 
@@ -160,6 +175,37 @@ sdog report --open  # one static HTML file on your disk: the kit, the timeline, 
 No server, no network, nothing loaded from anywhere. It holds your project names and error messages, so it stays
 yours; `sdog share` is the thing for sharing.
 
+## For the agents
+
+The agent is the one who starts from zero every session. He doesn't.
+
+```bash
+sdog brief          # what your past sessions say, in a few lines, every line on counts (~150-250 tokens)
+sdog check "Before running SQL on Supabase, read the table schema"
+sdog mcp            # the same answers as an MCP server: audit_setup, check_rule, evidence
+```
+
+`check` is for the moment someone says *"add a rule"*. Is something like it already loaded? Do your corrections
+say it? Do the tools it names fail for a reason it would fix? It answers **already said**, **supported**, **weak**
+or **no evidence**, with the numbers, and what the rule would cost in every session. On ours, the Supabase rule
+above comes back *supported*: 6% of 1,039 calls fail, most of them SQL written blind. "Never use emoji in commit
+messages" comes back *no evidence*.
+
+The Claude Code plugin registers the MCP server, so the agent can ask by itself. We tried it in a real session:
+asked to add that rule, Claude called `check_rule` first, then wrote the rule and told us why.
+
+`brief` is the agent's memory, built from the data instead of from hunches: the habits that go with worse answers
+in your sessions, and the tools that keep failing with what to do about each (*"re-read the page state before
+acting"*, *"auth: don't retry, tell the user"*). Two optional hooks, off until you turn them on:
+
+```bash
+sdog hooks on brief      # the brief at the start of every session (~200 tokens, every session)
+sdog hooks on sentinel   # once a week, one line on what a change of yours did
+```
+
+Both are journaled; `sdog undo` turns them off again. And he measures himself: SuspiciousDog shows up in its own
+kit, and if he's ballast for you, the checkup says so.
+
 ## Commands
 
 | | |
@@ -171,6 +217,11 @@ yours; `sdog share` is the thing for sharing.
 | `sdog rules` | beta: rules your corrections keep repeating |
 | `sdog prune` / `undo` / `note` / `journal` | lighten the kit on your yes, put things back, log what you changed by hand, see what it did |
 | `sdog report` | everything on one HTML page, on your disk (`--open`, `--out`) |
+| `sdog brief` | for agents: what your past sessions say, in a few lines (`--here`, `--json`) |
+| `sdog check "RULE"` | before adding a rule: already said, supported, weak or no evidence (`--json`) |
+| `sdog mcp` | the MCP server: `audit_setup`, `check_rule`, `evidence` |
+| `sdog hooks on\|off brief\|sentinel` | optional hooks, off by default, each with an undo |
+| `sdog classify` | optional: a small model reads the replies (`--validate`, `--backend claude\|anthropic\|openai`) |
 | `sdog doctor` | what he can read, and whether the transcript format changed under him |
 | `sdog show "ends offering more work" --outcome deferral` | the actual turns behind a number. Read them before you believe anything. |
 | `sdog test "t.tool_calls > 40"` | your own hypothesis, as a Python expression over a turn |
@@ -184,7 +235,7 @@ yours; `sdog share` is the thing for sharing.
 **Any agent, any OS:** `pipx install git+https://github.com/Saturday-Company/SuspiciousDog`, then `sdog`.
 Python 3.10+, no dependencies.
 
-**Claude Code plugin** (adds `/suspiciousdog:sniff` and a skill, no pip needed):
+**Claude Code plugin** (adds `/suspiciousdog:sniff`, a skill and the MCP server, no pip needed):
 
 ```bash
 claude plugin marketplace add Saturday-Company/SuspiciousDog
@@ -197,13 +248,13 @@ agent in [INSTALL.md](INSTALL.md).
 
 ## What he reads
 
-| Agent | Where | Status |
-|---|---|---|
-| Claude Code | `~/.claude/projects/*/*.jsonl` | stable, tested on real sessions |
-| Codex CLI | `~/.codex/sessions/**/rollout-*.jsonl` (legacy and paginated) | beta |
-| Gemini CLI | `~/.gemini/tmp/*/chats/session-*.jsonl` (and the old `.json`) | beta |
-| Aider | `.aider.chat.history.md` | beta |
-| Anything else | the open JSONL format, `sdog format` | stable |
+| Agent | Where | Turns | Kit |
+|---|---|---|---|
+| Claude Code | `~/.claude/projects/*/*.jsonl` | stable, tested on real sessions | everything |
+| Codex CLI | `~/.codex/sessions/**/rollout-*.jsonl` | beta | skills, AGENTS.md, used MCP servers and why they fail |
+| Gemini CLI | `~/.gemini/tmp/*/chats/session-*.jsonl` | beta | GEMINI.md files, server notes, used tools and skills |
+| Aider | `.aider.chat.history.md` | beta | read-only files (conventions), models |
+| Anything else | the open JSONL format, `sdog format` | stable | if you write `loaded` events |
 
 Beta readers are built from each agent's source code and tested on fixtures, not yet on real sessions. If one
 misreads yours, open an issue with the shape (not the content) of the file.
@@ -216,13 +267,16 @@ misreads yours, open an issue with the shape (not the content) of the file.
 3. For every factor and outcome: outcome rate with the factor vs without, Fisher's exact test, then
    Benjamini-Hochberg across all tests, because with 80 tests a few small p-values are just luck.
 4. `show` puts the real turns next to every number. Outcomes are read from the text of your reply, so a "no" to an
-   offer counts as pushback. The numbers say where to look; the turns say what happened.
+   offer counts as pushback. `sdog classify` has a small model read them instead, if you want it to. The numbers say
+   where to look; the turns say what happened.
 
 ## FAQ
 
 **Is it causation?** No. He tells you where to look. You look.
 
-**Does anything leave my machine?** Only when you run `sdog share` and say yes, and only counts.
+**Does anything leave my machine?** Only when you run `sdog share` and say yes, and only counts. Or when you run
+`sdog classify`, which sends the end of each agent message and your reply to the model you pick, after telling you
+how much.
 
 **It found nothing.** Good. Your agent is fine, or you need more sessions. Either way, no new plugins today.
 

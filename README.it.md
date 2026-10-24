@@ -12,7 +12,7 @@
 <p align="center"><a href="README.md">English</a></p>
 
 <p align="center">
-  <img src="assets/hypotheses.svg" alt="Tre idee messe alla prova su 1.009 turni veri: due morte, una in bilico a q = 0,065" width="820">
+  <img src="assets/hypotheses.svg" alt="Tre idee messe alla prova su 1.009 turni veri: tutte e tre morte" width="820">
 </p>
 
 Ogni plugin, skill, hook e riga di `CLAUDE.md` o `AGENTS.md` che dai a un agente AI è un'ipotesi: *se l'agente fa X,
@@ -50,7 +50,15 @@ Quella sopravvissuta ce l'ha fatta per un soffio.
 "forse". L'esito "lamentela" aggiunto nella 0.2 lo conferma: su 52 proposte, zero lamentele. Alle proposte si risponde
 "dopo", non "sbagliato". Il soffio di una persona sola non è un risultato.
 
-È una persona sola. Per effetti così piccoli ne servono molte di più. **Qui entri tu.**
+**Poi le risposte le ha lette un modello.** Le espressioni che riconoscono un "no" costano poco ma sono un po'
+ottuse: per loro *"no, dopo"* è una lamentela. Nella 0.2 le risposte può leggerle un modello piccolo (`sdog classify`,
+spento finché non lo lanci tu). Su 80 risposte etichettate a mano ne ha indovinate 77, le espressioni 58. Lette da
+Haiku, le proposte di altro lavoro non sono affatto una cattiva abitudine: ricevono un sì rapido nel 40% dei casi
+contro il 23%, e un no secco nel 7,7% contro l'1,4%. Chiudere con una domanda fa lo stesso, in modo più netto: sì nel
+43% contro il 22%, no nel 6,7% contro l'1,1%, entrambi veri. Alle domande si risponde, tutto qui. La nostra idea
+sopravvissuta era un "no" letto male.
+
+Tre idee, tre sbagliate. È una persona sola, e per effetti così piccoli ne servono molte di più. **Qui entri tu.**
 
 ## Aiuta il branco
 
@@ -66,16 +74,18 @@ solo questo:
 | quali agenti, quante sessioni | i tuoi prompt, le risposte dell'agente |
 | quanti turni, in quanti giorni | nomi di file, percorsi, nomi dei progetti |
 | per ogni fattore × esito: quattro numeri interi | codice, comandi, qualsiasi cosa tu abbia scritto |
+| per plugin, server MCP e strumenti pubblici: sessioni in cui sono caricati e usati, chiamate, errori, peso | le tue skill, i plugin privati, i connettori con nomi tuoi, i CLAUDE.md: diventano un numero solo, "aggiunte private" |
 
-I nomi dei fattori vengono dall'elenco di SuspiciousDog, e un test blocca la build se potesse entrare altro
-([PRIVACY.md](PRIVACY.md)). Ogni risultato condiviso è pubblico: il dataset è di tutti quelli che lo arricchiscono.
-Pubblicheremo cosa mostra: quali abitudini degli agenti ricevono più "no", su quali agenti, e se i plugin di moda
-spostano davvero qualcosa.
+I nomi dei fattori vengono dall'elenco di SuspiciousDog, quelli pubblici da elenchi fissi, e un test blocca la build
+se potesse entrare altro ([PRIVACY.md](PRIVACY.md)). Ogni risultato condiviso è pubblico: il dataset è di tutti quelli
+che lo arricchiscono. Una GitHub Action somma le condivisioni nella pagina del branco, che va online con le prime:
+quali abitudini degli agenti vanno con risposte peggiori, e per ogni plugin e server MCP pubblico quanto lo usa
+davvero chi lo carica e quanto spesso fallisce. I marketplace mostrano le stelle. Questa mostra l'uso.
 
 ## Il tuo kit
 
-*Novità della 0.2, per ora solo Claude Code.* Ogni plugin, skill, server MCP e riga del CLAUDE.md che aggiungi è una
-scommessa. Lui controlla le scommesse.
+*Novità della 0.2.* Ogni plugin, skill, server MCP e riga del CLAUDE.md che aggiungi è una scommessa. Lui controlla
+le scommesse. Claude Code registra quasi tutto; Codex, Gemini CLI e Aider meno, e `sdog doctor` dice cosa non si vede.
 
 Ogni sessione annota cosa ha caricato nel contesto prima che tu scrivessi una parola (l'elenco delle skill e dei
 sottoagenti, le istruzioni dei server MCP, i CLAUDE.md) e cosa ha usato davvero.
@@ -90,17 +100,37 @@ Sulle nostre 305 sessioni: 60.000 token prima della prima parola. Delle 114 skil
 sono state usate 30, e circa 5.400 token a sessione andavano a cose mai usate.
 
 `sdog prune` propone cosa togliere e lo fa solo dopo il tuo sì:
-- disattiva i plugin e rimuove i server con i comandi di Claude Code;
-- sposta le skill in una soffitta, o nell'unico progetto che le usa.
+- disattiva i plugin e rimuove i server con i comandi dell'agente;
+- sposta le skill in una soffitta, o nell'unico progetto che le usa;
+- lascia stare le cose che usi ogni tanto e pesano meno di 100 token a sessione.
 
 Ogni modifica finisce in un diario e si annulla con `sdog undo`. Quello che vive su claude.ai lo togli tu, e
-`sdog note` lo annota. Dopo due settimane `sdog journal` dice se è peggiorato qualcosa.
+`sdog note` lo annota. Dopo due settimane `sdog journal` dice se è peggiorato qualcosa e di quanto si è davvero
+alleggerito l'inizio delle sessioni, misurato sull'uso delle API e non stimato.
 
 Altri comandi:
 - `sdog timeline` trova da solo i giorni in cui il kit è cambiato e confronta le tue risposte nei 14 giorni prima e
   dopo.
 - `sdog rules` (beta) cerca le regole che le tue correzioni continuano a ripetere.
 - `sdog report --open` mette tutto in una pagina HTML che resta sul tuo disco.
+
+## Per gli agenti
+
+L'agente riparte da zero a ogni sessione. Lui no.
+- `sdog brief`: in poche righe, cosa dicono le tue sessioni passate (circa 200 token). Le abitudini che vanno con
+  risposte peggiori, gli strumenti che continuano a fallire e cosa fare per ciascuno.
+- `sdog check "la regola"`: prima di aggiungere una regola dice se qualcosa di simile è già caricato, se le tue
+  correzioni la ripetono, se gli strumenti che nomina falliscono per un motivo che la regola risolverebbe. Risponde
+  **already said**, **supported**, **weak** o **no evidence**, con i numeri e quanto costerebbe la regola in ogni
+  sessione.
+- `sdog mcp`: le stesse risposte come server MCP (`audit_setup`, `check_rule`, `evidence`). Il plugin di Claude Code
+  lo registra da solo. Lo abbiamo provato in una sessione vera: alla richiesta di aggiungere una regola, Claude ha
+  chiamato prima `check_rule` e poi l'ha scritta spiegando perché.
+- `sdog hooks on brief` e `sdog hooks on sentinel`: due hook facoltativi, spenti di default. Il primo dà il brief a
+  ogni sessione, il secondo una volta a settimana dice in una riga cosa ha fatto una tua modifica. Si annullano con
+  `sdog undo`.
+
+E misura anche se stesso: SuspiciousDog compare nel suo kit, e se per te è zavorra il referto lo dice.
 
 ## Dieci secondi
 

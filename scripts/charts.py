@@ -13,6 +13,7 @@ ASSETS = ROOT / "assets"
 GREY, DEAD, REAL, MAYBE, BAR_OFF = "#8b949e", "#cf222e", "#2da44e", "#d29922", "#8b949e"
 LATEST = "saturday-2026-10-24.json"
 KIT = "saturday-2026-10-24-kit.json"
+READ_BY_MODEL = "saturday-2026-10-24-classifier.json"
 FONT = "-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
 
 
@@ -38,23 +39,25 @@ def hypotheses():
     red = prov["red"]["then_failed"] / prov["red"]["names"]
     green = prov["green"]["then_failed"] / prov["green"]["names"]
     blind_with, blind_without, blind_n = _row(data, "claims_done_without_looking", "pushback")
-    offer_with, offer_without, offer_n = _row(data, "ends_offering_more_work", "pushback")
-    verdict, q = _verdicts(data)[("ends_offering_more_work", "pushback")]
+    model = json.loads((RESULTS / READ_BY_MODEL).read_text())     # replies read by Haiku: `sdog classify`
+    offer_with, offer_without, offer_n = _row(model, "ends_offering_more_work", "complaint")
+    verdict, q = _verdicts(model)[("ends_offering_more_work", "complaint")]
     colour = {"REAL": REAL, "MAYBE": MAYBE, "DEAD": DEAD}[verdict]
+    dead = sum(v == "DEAD" for v in ("DEAD", "DEAD", verdict))
     cards = [
         ("Names written from memory", "tool calls that then failed", f"{prov['red']['names']:,} names",
          ("from memory", red), ("seen first", green), "DEAD", DEAD),
         ("“Done”, without looking", "turns the user pushed back on", f"{blind_n} turns",
          ("claims done blind", blind_with), ("every other turn", blind_without), "DEAD", DEAD),
-        ("“Shall I also…?”", f"turns the user pushed back on · q = {q:.3f}", f"{offer_n} turns",
+        ("“Shall I also…?”", "replies a model read as a complaint", f"{offer_n} turns",
          ("offers more work", offer_with), ("every other turn", offer_without), verdict, colour),
     ]
     w, h, top = 860, 150 + 120 * len(cards), 70
     out = [f'<svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg" font-family="{FONT}">',
-           "<title>Three ideas about AI agents, tested on real sessions: two died</title>",
+           "<title>Three ideas about AI agents, tested on real sessions</title>",
            f'<text x="{w / 2}" y="28" font-size="16" font-weight="600" fill="{GREY}" text-anchor="middle">'
-           f'Three ideas, tested on {data["turns"]} real turns. Two died' +
-           ('.' if verdict == "REAL" else ', one is hanging on.') + '</text>',
+           f'Three ideas, tested on {data["turns"]:,} real turns. ' +
+           ("All three died." if dead == 3 else f"{dead} died.") + '</text>',
            f'<text x="{w / 2}" y="50" font-size="12" fill="{GREY}" text-anchor="middle">'
            f'{data["agents"].get("claude-code", 0)} Claude Code sessions over {data["days"]} days · reproduce on yours: sdog sniff</text>']
     for i, (title, metric, n, (la, va), (lb, vb), verdict, colour) in enumerate(cards):

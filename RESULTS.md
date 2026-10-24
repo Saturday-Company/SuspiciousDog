@@ -86,3 +86,35 @@ Among things loaded in 20 or more of 305 sessions: 30 of 114 skills, 19 of 30 MC
 used at least once. 60,026 tokens before the first word on average (from the first API call of each session); about
 5,399 of them a session on things never used and removable (estimated as characters ÷ 4). The four servers marked
 misused failed 16.4%, 7.4%, 6.6% and 6.3% of the time, against 2.7% for all other tool calls.
+
+## Update, 2026-10-24, later: the replies read by a model
+
+[`results/saturday-2026-10-24-classifier.json`](results/saturday-2026-10-24-classifier.json). `sdog classify` had
+Claude Haiku label each of the 1,011 replies as complaint, declines, defers, accepts, new request or other, from the
+end of the agent's message and the reply (up to 300 characters each).
+
+**Validation.** On the 80 replies in `suspiciousdog/data/labels.jsonl`, in English and Italian, Haiku agreed with the
+hand labels on 77, the regular expressions on 58. The 80 were written and labelled by us, for this check: they are
+not a random sample of anybody's sessions, so read 96% against 72% as "clearly better", not as a measured accuracy.
+
+**Results**, same test and correction as `sniff`, outcomes from the model's labels:
+
+| factor | outcome | with | without | q |
+|---|---|---:|---:|---:|
+| ends with a question | quick yes | 43.3% (45 of 104) | 22.1% | < 0.001 |
+| ends with a question | declines | 6.7% (7 of 104) | 1.1% | 0.034 |
+| ends with a question | complaint | 1.9% (2 of 104) | 8.2% | 0.30 |
+| ends offering more work | quick yes | 40.4% (21 of 52) | 23.4% | 0.19 |
+| ends offering more work | declines | 7.7% (4 of 52) | 1.4% | 0.19 |
+| ends offering more work | complaint | 1.9% (1 of 52) | 7.8% | 0.85 |
+
+A question or an offer at the end of a turn gets a direct answer, yes or no, more often than anything else, and
+fewer complaints. The 2026-10-23 "pushback" was the regular expressions counting "no, later" as a complaint. Of the
+three ideas we started with, none holds as stated.
+
+## Update, 2026-10-24: pruning our own kit
+
+Applied with `sdog prune` and written in the journal on 2026-10-24: the hyperframes plugin (3 of 260 sessions,
+~2,800 tokens a session), its companion skill, and a skill never called in 186 sessions. The before/after, including
+the measured context at the start of each session, will be in `sdog journal` once 100 turns have gone by.
+

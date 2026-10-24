@@ -1,6 +1,6 @@
 ---
 description: Sniff your agent sessions for what actually works (SuspiciousDog)
-argument-hint: "[checkup|kit [NAME]|timeline|prune|sniff|show FACTOR|before-after DATE|report|doctor] [--project NAME]"
+argument-hint: "[checkup|kit [NAME]|check RULE|brief|timeline|prune|sniff|show FACTOR|report|doctor] [--project NAME]"
 allowed-tools: Bash(PYTHONPATH=* python3 -m suspiciousdog:*)
 ---
 
@@ -13,4 +13,6 @@ Run SuspiciousDog on the user's sessions and explain what it found.
 4. For `prune`, list the proposals and ask which to apply; run `prune --apply N` only with the user's yes.
 5. For `kit`, report the ballast, the misused items and the tokens they cost; give the removal hints but never
    apply them.
-6. Mention that `share` sends only counts to the public dataset. Do not run it unless the user says yes.
+6. For `check "RULE"`, give the verdict and its numbers; if it says "already said" or "no evidence", say that adding
+   the rule probably isn't worth it.
+7. Mention that `share` sends only counts to the public dataset. Do not run it unless the user says yes.
