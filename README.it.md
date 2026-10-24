@@ -12,7 +12,7 @@
 <p align="center"><a href="README.md">English</a></p>
 
 <p align="center">
-  <img src="assets/hypotheses.svg" alt="Tre idee messe alla prova su 980 turni veri: due morte, una sopravvissuta" width="820">
+  <img src="assets/hypotheses.svg" alt="Tre idee messe alla prova su 1.009 turni veri: due morte, una in bilico a q = 0,065" width="820">
 </p>
 
 Ogni plugin, skill, hook e riga di `CLAUDE.md` o `AGENTS.md` che dai a un agente AI è un'ipotesi: *se l'agente fa X,
@@ -28,7 +28,7 @@ un foglio stampato: non è cambiato niente. Aveva ragione. Ha sempre ragione. Ha
 
 ## I numeri
 
-Lo abbiamo provato prima sulle nostre sessioni: 290 sessioni di Claude Code, 980 turni, 28 giorni. Una persona, un
+Il 23/10 lo abbiamo provato sulle nostre sessioni: 290 sessioni di Claude Code, 980 turni, 28 giorni. Una persona, un
 modello. Dati veri, gli stessi conteggi che chiunque può rifare con `sdog sniff`. Gli abbiamo dato le nostre tre
 idee migliori.
 
@@ -45,6 +45,10 @@ futuro"*. Gli stessi turni finiscono in un rinvio nel 10,2% dei casi contro l'1,
 
 Due idee su tre sono morte in una sera. Senza misurare le avremmo installate come hook su tutti i nostri progetti.
 Quella sopravvissuta ce l'ha fatta per un soffio.
+
+**Il giorno dopo non più.** Il 24/10 sono arrivate altre tre proposte, nessuna rifiutata: 7 su 52, q = 0,065. Torna
+"forse". L'esito "lamentela" aggiunto nella 0.2 lo conferma: su 52 proposte, zero lamentele. Alle proposte si risponde
+"dopo", non "sbagliato". Il soffio di una persona sola non è un risultato.
 
 È una persona sola. Per effetti così piccoli ne servono molte di più. **Qui entri tu.**
 
@@ -68,12 +72,43 @@ I nomi dei fattori vengono dall'elenco di SuspiciousDog, e un test blocca la bui
 Pubblicheremo cosa mostra: quali abitudini degli agenti ricevono più "no", su quali agenti, e se i plugin di moda
 spostano davvero qualcosa.
 
+## Il tuo kit
+
+*Novità della 0.2, per ora solo Claude Code.* Ogni plugin, skill, server MCP e riga del CLAUDE.md che aggiungi è una
+scommessa. Lui controlla le scommesse.
+
+Ogni sessione annota cosa ha caricato nel contesto prima che tu scrivessi una parola (l'elenco delle skill e dei
+sottoagenti, le istruzioni dei server MCP, i CLAUDE.md) e cosa ha usato davvero.
+- `sdog` mostra il referto in una schermata.
+- `sdog kit` mette in fila tutto: per ogni aggiunta dice quanto pesa, quante volte la usi, quante volte fallisce, e
+  dà un verdetto.
+- `sdog kit NOME` mostra il dettaglio, perché fallisce e come toglierla.
+
+<p align="center"><img src="assets/kit.svg" alt="Le nostre sessioni: 60.026 token prima della prima parola, 5.399 su cose mai usate" width="820"></p>
+
+Sulle nostre 305 sessioni: 60.000 token prima della prima parola. Delle 114 skill caricate in almeno 20 sessioni ne
+sono state usate 30, e circa 5.400 token a sessione andavano a cose mai usate.
+
+`sdog prune` propone cosa togliere e lo fa solo dopo il tuo sì:
+- disattiva i plugin e rimuove i server con i comandi di Claude Code;
+- sposta le skill in una soffitta, o nell'unico progetto che le usa.
+
+Ogni modifica finisce in un diario e si annulla con `sdog undo`. Quello che vive su claude.ai lo togli tu, e
+`sdog note` lo annota. Dopo due settimane `sdog journal` dice se è peggiorato qualcosa.
+
+Altri comandi:
+- `sdog timeline` trova da solo i giorni in cui il kit è cambiato e confronta le tue risposte nei 14 giorni prima e
+  dopo.
+- `sdog rules` (beta) cerca le regole che le tue correzioni continuano a ripetere.
+- `sdog report --open` mette tutto in una pagina HTML che resta sul tuo disco.
+
 ## Dieci secondi
 
 ```bash
 pipx install git+https://github.com/Saturday-Company/SuspiciousDog
 sdog demo        # sessioni sintetiche, per vedere com'è
-sdog             # le tue
+sdog             # le tue: il referto
+sdog kit         # cosa carichi, cosa usi, cosa fallisce
 ```
 
 Comandi, installazione per ogni agente, agenti supportati e metodo sono nel [README in inglese](README.md) e in

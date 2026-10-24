@@ -1,7 +1,7 @@
 <svg viewBox="0 0 860 510" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
 <title>Three ideas about AI agents, tested on real sessions: two died</title>
-<text x="430.0" y="28" font-size="16" font-weight="600" fill="#8b949e" text-anchor="middle">Three ideas, tested on 980 real turns. Two died.</text>
-<text x="430.0" y="50" font-size="12" fill="#8b949e" text-anchor="middle">290 Claude Code sessions over 28 days · reproduce on yours: sdog sniff</text>
+<text x="430.0" y="28" font-size="16" font-weight="600" fill="#8b949e" text-anchor="middle">Three ideas, tested on 1009 real turns. Two died, one is hanging on.</text>
+<text x="430.0" y="50" font-size="12" fill="#8b949e" text-anchor="middle">296 Claude Code sessions over 29 days · reproduce on yours: sdog sniff</text>
 <text x="40" y="90" font-size="15" font-weight="600" fill="#8b949e">Names written from memory</text>
 <text x="40" y="108" font-size="12" fill="#8b949e">tool calls that then failed · 19,244 names</text>
 <rect x="730" y="74" width="88" height="26" rx="4" fill="none" stroke="#cf222e" stroke-width="2"/>
@@ -13,24 +13,24 @@
 <rect x="200" y="148" width="430.0" height="18" rx="2" fill="#8b949e" fill-opacity="0.45"/>
 <text x="638.0" y="162" font-size="12" font-weight="600" fill="#8b949e">0.13%</text>
 <text x="40" y="210" font-size="15" font-weight="600" fill="#8b949e">“Done”, without looking</text>
-<text x="40" y="228" font-size="12" fill="#8b949e">turns the user pushed back on · 27 turns</text>
+<text x="40" y="228" font-size="12" fill="#8b949e">turns the user pushed back on · 28 turns</text>
 <rect x="730" y="194" width="88" height="26" rx="4" fill="none" stroke="#cf222e" stroke-width="2"/>
 <text x="774" y="212" font-size="13" font-weight="700" fill="#cf222e" text-anchor="middle" letter-spacing="1.5">DEAD</text>
 <text x="190" y="256" font-size="12" fill="#8b949e" text-anchor="end">claims done blind</text>
 <rect x="200" y="242" width="430.0" height="18" rx="2" fill="#cf222e" fill-opacity="1"/>
-<text x="638.0" y="256" font-size="12" font-weight="600" fill="#8b949e">3.7%</text>
+<text x="638.0" y="256" font-size="12" font-weight="600" fill="#8b949e">3.6%</text>
 <text x="190" y="282" font-size="12" fill="#8b949e" text-anchor="end">every other turn</text>
-<rect x="200" y="268" width="365.5" height="18" rx="2" fill="#8b949e" fill-opacity="0.45"/>
-<text x="573.5" y="282" font-size="12" font-weight="600" fill="#8b949e">3.1%</text>
+<rect x="200" y="268" width="380.5" height="18" rx="2" fill="#8b949e" fill-opacity="0.45"/>
+<text x="588.5" y="282" font-size="12" font-weight="600" fill="#8b949e">3.2%</text>
 <text x="40" y="330" font-size="15" font-weight="600" fill="#8b949e">“Shall I also…?”</text>
-<text x="40" y="348" font-size="12" fill="#8b949e">turns the user pushed back on · 49 turns</text>
-<rect x="730" y="314" width="88" height="26" rx="4" fill="none" stroke="#2da44e" stroke-width="2"/>
-<text x="774" y="332" font-size="13" font-weight="700" fill="#2da44e" text-anchor="middle" letter-spacing="1.5">REAL</text>
+<text x="40" y="348" font-size="12" fill="#8b949e">turns the user pushed back on · q = 0.065 · 52 turns</text>
+<rect x="730" y="314" width="88" height="26" rx="4" fill="none" stroke="#d29922" stroke-width="2"/>
+<text x="774" y="332" font-size="13" font-weight="700" fill="#d29922" text-anchor="middle" letter-spacing="1.5">MAYBE</text>
 <text x="190" y="376" font-size="12" fill="#8b949e" text-anchor="end">offers more work</text>
-<rect x="200" y="362" width="430.0" height="18" rx="2" fill="#2da44e" fill-opacity="1"/>
-<text x="638.0" y="376" font-size="12" font-weight="600" fill="#8b949e">14.3%</text>
+<rect x="200" y="362" width="430.0" height="18" rx="2" fill="#d29922" fill-opacity="1"/>
+<text x="638.0" y="376" font-size="12" font-weight="600" fill="#8b949e">13.5%</text>
 <text x="190" y="402" font-size="12" fill="#8b949e" text-anchor="end">every other turn</text>
-<rect x="200" y="388" width="77.6" height="18" rx="2" fill="#8b949e" fill-opacity="0.45"/>
-<text x="285.6" y="402" font-size="12" font-weight="600" fill="#8b949e">2.6%</text>
-<text x="430.0" y="488" font-size="11" fill="#8b949e" text-anchor="middle">Bars are scaled per idea. REAL survives the Benjamini-Hochberg correction across every test (q &lt; 0.05).</text>
+<rect x="200" y="388" width="83.4" height="18" rx="2" fill="#8b949e" fill-opacity="0.45"/>
+<text x="291.4" y="402" font-size="12" font-weight="600" fill="#8b949e">2.6%</text>
+<text x="430.0" y="488" font-size="11" fill="#8b949e" text-anchor="middle">Bars are scaled per idea. REAL survives the Benjamini-Hochberg correction across every test (q &lt; 0.05); MAYBE is p &lt; 0.05 alone.</text>
 </svg>

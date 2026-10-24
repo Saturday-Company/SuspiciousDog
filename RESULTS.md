@@ -69,3 +69,20 @@ this needs confirming on new data.
 - Outcomes come from regular expressions on the reply. They miss sarcasm, and count a "no" to an offer as pushback.
 - One user and about 1,000 turns: only large effects are visible.
 - Subagent transcripts are ignored.
+
+## Update, 2026-10-24
+
+One more day of sessions: 296 sessions, 1,009 answered turns, 29 days
+([`results/saturday-2026-10-24.json`](results/saturday-2026-10-24.json)). Three more turns ended offering more work,
+and none was turned down. "Ends offering more work" → pushback is now 7 of 52 against 25 of 957, p = 0.0008,
+q = 0.065: no longer a finding, a lead. Deferral: 5 of 52 against 13 of 957, q = 0.065. Out of the 52, zero drew a
+complaint (the 0.2 outcome that leaves out a "no" to an offer), so the reading from `show` stands: offers get
+postponed, not resented.
+
+### The kit (0.2)
+
+[`results/saturday-2026-10-24-kit.json`](results/saturday-2026-10-24-kit.json), aggregate counts only, no names.
+Among things loaded in 20 or more of 305 sessions: 30 of 114 skills, 19 of 30 MCP servers and 4 of 6 subagents were
+used at least once. 60,026 tokens before the first word on average (from the first API call of each session); about
+5,399 of them a session on things never used and removable (estimated as characters ÷ 4). The four servers marked
+misused failed 16.4%, 7.4%, 6.6% and 6.3% of the time, against 2.7% for all other tool calls.

@@ -34,6 +34,13 @@ class Turn:
     texts: list = field(default_factory=list)
     reply: str = ""
     interrupted: bool = False
+    ended: datetime | None = None   # the last thing the agent did in the turn, when the transcript says
+    tokens: int = 0                 # output tokens, when the transcript says
+
+    @property
+    def seconds(self):
+        """How long the agent worked on the turn, or None."""
+        return (self.ended - self.when).total_seconds() if self.when and self.ended else None
 
     @property
     def calls(self):

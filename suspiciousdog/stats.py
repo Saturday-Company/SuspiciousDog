@@ -4,17 +4,27 @@ import math
 
 
 def fisher(a, b, c, d):
-    """Two-sided Fisher exact test on [[a, b], [c, d]]."""
+    """Two-sided Fisher exact test on [[a, b], [c, d]]. Exact integers for small tables, logarithms for big ones."""
     n, row, col = a + b + c + d, a + b, a + c
     if n == 0 or row in (0, n) or col in (0, n):
         return 1.0
-    total = math.comb(n, row)
+    xs = range(max(0, row + col - n), min(row, col) + 1)
+    if n <= 2000:
+        total = math.comb(n, row)
 
-    def p(x):
-        return math.comb(col, x) * math.comb(n - col, row - x) / total
-    observed = p(a)
-    return min(1.0, sum(p(x) for x in range(max(0, row + col - n), min(row, col) + 1)
-                        if p(x) <= observed * (1 + 1e-9)))
+        def p(x):
+            return math.comb(col, x) * math.comb(n - col, row - x) / total
+        observed = p(a)
+        return min(1.0, sum(p(x) for x in xs if p(x) <= observed * (1 + 1e-9)))
+
+    def lchoose(m, k):
+        return math.lgamma(m + 1) - math.lgamma(k + 1) - math.lgamma(m - k + 1)
+    base = lchoose(n, row)
+
+    def logp(x):
+        return lchoose(col, x) + lchoose(n - col, row - x) - base
+    observed = logp(a)
+    return min(1.0, sum(math.exp(lp) for lp in map(logp, xs) if lp <= observed + 1e-7))
 
 
 def benjamini_hochberg(results):

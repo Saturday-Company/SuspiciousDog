@@ -1,0 +1,45 @@
+{
+ "sessions": 305,
+ "first": "2026-09-26",
+ "last": "2026-10-23",
+ "base_tokens": 60026,
+ "ballast_tokens": 5399,
+ "kinds": {
+  "subagent": {
+   "loaded": 6,
+   "used": 4,
+   "never_used": 2,
+   "never_used_built_in": 2
+  },
+  "mcp": {
+   "loaded": 30,
+   "used": 19,
+   "never_used": 11,
+   "never_used_built_in": 0
+  },
+  "skill": {
+   "loaded": 114,
+   "used": 30,
+   "never_used": 84,
+   "never_used_built_in": 19
+  }
+ },
+ "misused": [
+  {
+   "error_rate": 0.1644,
+   "calls": 219
+  },
+  {
+   "error_rate": 0.0741,
+   "calls": 108
+  },
+  {
+   "error_rate": 0.0659,
+   "calls": 3113
+  },
+  {
+   "error_rate": 0.0626,
+   "calls": 1039
+  }
+ ]
+}

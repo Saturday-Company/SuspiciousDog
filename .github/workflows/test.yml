@@ -13,3 +13,5 @@ jobs:
           python-version: ${{ matrix.python }}
       - run: python -m unittest discover -s tests -t . -v
       - run: python -m suspiciousdog demo
+      - run: python -m suspiciousdog kit --path tests/fixtures/kit --no-cache
+      - run: python -m suspiciousdog doctor

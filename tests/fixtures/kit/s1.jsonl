@@ -1,0 +1,18 @@
+{"type": "attachment", "timestamp": "2026-10-20T09:00:00Z", "version": "2.1.300", "cwd": "/code/shop", "attachment": {"type": "skill_listing", "content": "- tidy: Keep the code tidy.\n  More about tidying.\n- deploy: Ship it.\n- plug:helper: A plugin skill"}}
+{"type": "attachment", "attachment": {"type": "mcp_instructions_delta", "addedNames": ["claude.ai Gamma", "shopdb"], "addedBlocks": ["## claude.ai Gamma\nMake slides.", "## shopdb\nQuery the shop."]}}
+{"type": "attachment", "attachment": {"type": "deferred_tools_delta", "addedNames": ["mcp__claude_ai_Gamma__generate", "mcp__shopdb__query", "Monitor"]}}
+{"type": "attachment", "attachment": {"type": "deferred_tools_delta", "addedNames": ["mcp__claude_ai_Gamma__generate", "mcp__shopdb__query", "Monitor"]}}
+{"type": "attachment", "attachment": {"type": "agent_listing_delta", "addedTypes": ["Explore", "reviewer"], "addedLines": ["- Explore: Read-only search.", "- reviewer: Reviews diffs."]}}
+{"type": "attachment", "attachment": {"type": "instructions", "files": [{"path": "/code/shop/CLAUDE.md", "type": "Project", "content": "Never push to main."}]}}
+{"type": "user", "timestamp": "2026-10-20T09:00:05Z", "message": {"role": "user", "content": "check the orders table"}}
+{"type": "assistant", "message": {"role": "assistant", "model": "claude-opus-5-5", "usage": {"input_tokens": 10, "cache_creation_input_tokens": 20000, "cache_read_input_tokens": 5000, "output_tokens": 5}, "content": [{"type": "tool_use", "id": "t1", "name": "mcp__shopdb__query", "input": {"sql": "select"}}]}}
+{"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "t1", "is_error": true, "content": "relation \"orders\" does not exist"}]}}
+{"type": "assistant", "message": {"role": "assistant", "model": "claude-opus-5-5", "content": [{"type": "tool_use", "id": "t2", "name": "mcp__shopdb__query", "input": {"sql": "select 2"}}]}}
+{"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "t2", "content": "3 rows"}]}}
+{"type": "assistant", "message": {"role": "assistant", "model": "claude-opus-5-5", "content": [{"type": "tool_use", "id": "t3", "name": "Skill", "input": {"skill": "tidy"}}, {"type": "tool_use", "id": "t4", "name": "Bash", "input": {"command": "git push"}}]}}
+{"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "t4", "is_error": true, "content": "The user doesn't want to proceed with this tool use. The tool use was rejected"}]}}
+{"type": "attachment", "attachment": {"type": "hook_blocking_error", "hookName": "Stop", "hookEvent": "Stop", "blockingError": {"blockingError": "no"}}}
+{"type": "attachment", "attachment": {"type": "hook_success", "hookName": "PreToolUse:Bash", "hookEvent": "PreToolUse", "command": "python3 ~/.claude/hooks/guard.py", "content": ""}}
+{"type": "user", "timestamp": "2026-10-20T09:10:00Z", "message": {"role": "user", "content": "<command-name>/deploy</command-name>"}}
+{"type": "assistant", "message": {"role": "assistant", "model": "claude-opus-5-5", "content": [{"type": "tool_use", "id": "t5", "name": "Agent", "input": {"subagent_type": "reviewer", "prompt": "review"}}]}}
+{"type": "user", "timestamp": "2026-10-20T09:12:00Z", "message": {"role": "user", "content": "thanks"}}

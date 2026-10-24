@@ -17,6 +17,20 @@ exception you have to ask for.
 
 Custom hypotheses from `sdog test` are never included.
 
+## What stays on your disk
+
+- `~/.cache/suspiciousdog/kit.sqlite`: what each session loaded and called, so the next run is instant. Delete it
+  any time; `--no-cache` skips it.
+- `~/.local/share/suspiciousdog/journal.jsonl`: what `sdog prune` changed and what you noted, with how to undo it.
+  When a user MCP server is removed, its definition is kept there so `sdog undo` can put it back, and definitions can
+  hold tokens: the file is created readable by you only (0600).
+- `~/.local/share/suspiciousdog/attic/`: skills and subagents that `prune` put away.
+- `~/.local/share/suspiciousdog/report.html`: written by `sdog report`. It holds project names and error messages.
+  It loads nothing from the network. Don't post it; `sdog share` is the thing for sharing.
+
+`sdog prune` changes your configuration only after you pick the changes, through `claude plugin disable` and
+`claude mcp remove` or by moving a folder. Nothing else in SuspiciousDog writes outside the folders above.
+
 ## What we do with shared results
 
 They stay public in the repository's issues. Saturday Company aggregates them and publishes the aggregate tables

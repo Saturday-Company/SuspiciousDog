@@ -1,6 +1,6 @@
 """Every factor against every outcome, corrected for the number of tests."""
 
-from .signals import FACTORS, OUTCOMES
+from .signals import ALL_OUTCOMES, FACTORS, OUTCOMES
 from .stats import benjamini_hochberg, compare
 
 MIN_TURNS = 10
@@ -37,6 +37,6 @@ def before_after(turns, moment, outcomes=None):
 
     def after(t):
         return t.when >= moment
-    rows = [(o, compare(answered, after, fn)) for o, fn in (outcomes or OUTCOMES).items()]
+    rows = [(o, compare(answered, after, fn)) for o, fn in (outcomes or ALL_OUTCOMES).items()]
     benjamini_hochberg([r for _, r in rows])
     return rows

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from suspiciousdog import cli, lab, share, synthetic
 from suspiciousdog.adapters import ADAPTERS, load
-from suspiciousdog.signals import FACTORS, OUTCOMES
+from suspiciousdog.signals import ALL_OUTCOMES, FACTORS, OUTCOMES
 from suspiciousdog.stats import benjamini_hochberg, compare, fisher
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -100,7 +100,7 @@ class Synthetic(unittest.TestCase):
     def test_before_after(self):
         from datetime import datetime, timezone
         rows = dict(lab.before_after(self.turns, datetime(2026, 9, 20, tzinfo=timezone.utc)))
-        self.assertEqual(set(rows), set(OUTCOMES))
+        self.assertEqual(set(rows), set(ALL_OUTCOMES))
         self.assertGreater(rows["quick yes"]["n_with"], 0)
 
 

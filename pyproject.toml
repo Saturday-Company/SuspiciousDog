@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "suspiciousdog"
-version = "0.1.0"
+version = "0.2.0b1"
 description = "Sniffs your AI agent transcripts for what actually works. Claude Code, Codex, Gemini CLI, Aider, or anything in the open format."
 readme = "README.md"
 license = "MIT"

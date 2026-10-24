@@ -1,10 +1,19 @@
 {
   "name": "suspiciousdog",
-  "version": "0.1.0",
-  "description": "Sniffs your Claude Code transcripts for what actually works: which agent habits get pushback, deferrals, interruptions. Counts, tests, and the real turns behind every number.",
-  "author": { "name": "Saturday Company", "url": "https://saturdaycompany.it" },
+  "version": "0.2.0b1",
+  "description": "Checks the bets in your agent setup: what every plugin, skill, MCP server and CLAUDE.md costs in context, how often it's used, why it fails, and whether changes helped. Prunes on your yes, with an undo. Local only.",
+  "author": {
+    "name": "Saturday Company",
+    "url": "https://saturdaycompany.it"
+  },
   "homepage": "https://github.com/Saturday-Company/SuspiciousDog",
   "repository": "https://github.com/Saturday-Company/SuspiciousDog",
   "license": "MIT",
-  "keywords": ["transcripts", "evals", "agents", "analytics", "privacy"]
+  "keywords": [
+    "transcripts",
+    "evals",
+    "agents",
+    "analytics",
+    "privacy"
+  ]
 }

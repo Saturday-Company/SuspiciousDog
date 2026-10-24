@@ -69,3 +69,28 @@ OUTCOMES = {
     "interruption": lambda t: t.interrupted,
     "quick yes": lambda t: bool(QUICK_YES.match(t.reply)) and len(t.reply.split()) <= 8,
 }
+
+
+def stems(text):
+    """Rough word stems, good enough to compare two messages in English or Italian."""
+    return {w[:6] for w in re.findall(r"[a-zà-ù]{4,}", text.lower())}
+
+
+def _declines_offer(t):
+    offered = bool(OFFERS_MORE.search(t.final.rstrip()[-200:]))
+    return offered and bool(re.match(r"^(no|nope|nah|non (ora|adesso|serve)|dopo|later|not now)\b", t.reply, re.I) or
+                            DEFERRAL.search(t.reply[:250]))
+
+
+def _asks_again(t):
+    a, b = stems(t.request), stems(t.reply)
+    return len(a) >= 4 and len(b) >= 4 and len(a & b) / len(a | b) >= 0.5
+
+
+# Outcomes added in 0.2. `sniff` keeps the four above, so its corrections and the shared dataset stay comparable;
+# `before-after`, `timeline`, `test` and `show` use these too.
+EXTRA_OUTCOMES = {
+    "complaint": lambda t: bool(PUSHBACK.search(t.reply[:300])) and not _declines_offer(t),
+    "asks again": _asks_again,
+}
+ALL_OUTCOMES = {**OUTCOMES, **EXTRA_OUTCOMES}

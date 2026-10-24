@@ -20,7 +20,7 @@
 <p align="center"><a href="README.it.md">Italiano</a></p>
 
 <p align="center">
-  <img src="assets/hypotheses.svg" alt="Three ideas tested on 980 real turns: two died, one survived" width="820">
+  <img src="assets/hypotheses.svg" alt="Three ideas tested on 1,009 real turns: two died, one is hanging on at q = 0.065" width="820">
 </p>
 
 Every plugin, skill, hook and line of `CLAUDE.md` or `AGENTS.md` you give an AI agent is a hypothesis:
@@ -36,7 +36,7 @@ over with a printout. It changed nothing. He was right. He's always right. He re
 
 ## The numbers
 
-We pointed him at our own sessions first: 290 Claude Code sessions, 980 turns, 28 days. One developer, one model.
+On 23/10 we pointed him at our own sessions: 290 Claude Code sessions, 980 turns, 28 days. One developer, one model.
 Real data, the same counts anyone can rebuild with `sdog sniff`. We handed him our three best ideas.
 
 **Names written from memory. Dead.** When an agent writes a method, flag or column it never saw in the context, it
@@ -52,6 +52,10 @@ The same turns get a deferral 10.2% of the time against 1.4%, just short of the 
 
 Two ideas out of three died in an evening. Without measuring, we'd have shipped both as hooks to every project
 we have. The one that survived, survived by a whisker.
+
+**A day later it didn't.** Three more offers on 24/10, none turned down: 7 in 52, q = 0.065. Back to *maybe*. The
+complaint outcome added in 0.2 says the same thing louder: of 52 offers, 0 drew a complaint. People say "later" to
+them, not "wrong". One developer's whisker is not a finding. (The chart at the top is the 24/10 count.)
 
 That's one developer. Effects that small need more than one developer to be sure. **That's where you come in.**
 
@@ -80,7 +84,8 @@ move anything at all.
 ```bash
 pipx install git+https://github.com/Saturday-Company/SuspiciousDog
 sdog demo        # synthetic sessions, to see what it looks like
-sdog             # your own
+sdog             # your own: the checkup
+sdog kit         # what you load, what you use, what fails
 ```
 
 <p align="center"><img src="assets/demo.svg" alt="sdog demo output on synthetic sessions" width="820"></p>
@@ -88,11 +93,85 @@ sdog             # your own
 The demo runs on made-up sessions with one planted effect, and says so. `real` means the result survives the
 correction for every test he ran. `maybe` is a lead. `vibes` is vibes.
 
+## Your kit
+
+*New in 0.2, Claude Code only for now.* Every plugin, skill, MCP server and line of CLAUDE.md you add was a bet.
+He checks the bets.
+
+```bash
+sdog                # the checkup: one screen, what weighs, what fails, what changed, what the agent keeps doing
+sdog kit            # everything you added: what it weighs, what you use, what fails
+sdog kit gamma      # one item in detail, and how to drop it
+```
+
+Every session writes down what it loaded into the context before you typed a word (the skill list, the subagent
+list, the instructions of every MCP server, your CLAUDE.md files) and what it actually called. He lines them up.
+
+<p align="center"><img src="assets/kit.svg" alt="Our sessions: 60,026 tokens before the first word, 5,399 of them on things never used. 30 of 114 skills used." width="820"></p>
+
+On our own 305 sessions: 60,000 tokens before the first word, on average. Of the 114 skills loaded in 20 or more
+sessions, 30 were ever used. About 5,400 tokens a session went to things we had never used once, and a connector
+loaded in 266 sessions had been called zero times. Four MCP servers failed more than twice as often as everything else.
+
+Every item gets a verdict: **ballast** (loaded in 20+ sessions, never used), **rare** (under 5% of the sessions that
+load it), **elsewhere** (used in one project, loaded in all of them), **misused** (fails far more often than your other
+tools), **earns its place**, or **too new to judge**. Built-in pieces you can't remove are counted apart. Token weights
+are estimates (characters ÷ 4) and say so.
+
+### Prune, with an undo
+
+```bash
+sdog prune          # proposals, applied only on your yes
+sdog undo           # put the last one back
+sdog journal        # everything changed or noted, and what happened after
+```
+
+He proposes, you pick. What he can do himself goes through Claude Code's own commands (`claude plugin disable`,
+`claude mcp remove`) or moves a skill into an attic, or into the one project that uses it. Every change goes into a
+journal with its undo. Connectors and skills that live on claude.ai he can't touch: he tells you where to click,
+and `sdog note "disconnected Gamma"` puts it in the journal. Two weeks later `sdog journal` says whether anything got
+worse.
+
+### When it changed, and what it did
+
+```bash
+sdog timeline       # every day your kit changed, found in the transcripts, with your answers before and after
+sdog kit vercel     # where a server fails, and why: auth, wrong arguments, bad code, wrong target, timeouts…
+sdog rules          # beta: rules in your CLAUDE.md that your corrections keep repeating
+```
+
+Nobody writes down "installed a plugin on the 6th". The sessions do: the first one that lists it, the day a
+CLAUDE.md came in with different content, the day the subagents started answering from another model. `timeline`
+finds those days on its own and compares the 14 days around each, with the same tests and corrections as `sniff`.
+Under 100 turns on either side it says *too early* and nothing else. Changes on the same day are one change: they
+can't be told apart.
+
+Failures get a reason, and the reason says who should fix it. *Auth* is your config. *Wrong arguments*, *bad code*,
+*not found* and *wrong target* are the agent guessing, and a one-line rule usually fixes them. *Blocked* is your
+safety layer doing its job. On our data, half of Vercel's failures were 403s, and two thirds of Supabase's were SQL
+errors, like querying a table that doesn't exist.
+
+### The whole thing on one page
+
+```bash
+sdog report --open  # one static HTML file on your disk: the kit, the timeline, the failures, the habits
+```
+
+No server, no network, nothing loaded from anywhere. It holds your project names and error messages, so it stays
+yours; `sdog share` is the thing for sharing.
+
 ## Commands
 
 | | |
 |---|---|
+| `sdog` | the checkup: one screen with what matters |
 | `sdog sniff` | every factor against every outcome (`--agent`, `--project`, `--outcome`, `--all`) |
+| `sdog kit [NAME]` | what you added to your agent: weight, use, failures, a verdict (`--kind`, `--all`, `--json`) |
+| `sdog timeline` | every change to your kit, found in the transcripts, with before/after (`--days`, `--all`) |
+| `sdog rules` | beta: rules your corrections keep repeating |
+| `sdog prune` / `undo` / `note` / `journal` | lighten the kit on your yes, put things back, log what you changed by hand, see what it did |
+| `sdog report` | everything on one HTML page, on your disk (`--open`, `--out`) |
+| `sdog doctor` | what he can read, and whether the transcript format changed under him |
 | `sdog show "ends offering more work" --outcome deferral` | the actual turns behind a number. Read them before you believe anything. |
 | `sdog test "t.tool_calls > 40"` | your own hypothesis, as a Python expression over a turn |
 | `sdog before-after CLAUDE.md` | did that rule help? Compares outcomes before and after its last commit (or any date). |

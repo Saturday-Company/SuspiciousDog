@@ -40,7 +40,7 @@ def payload(tables, turns, per_agent):
 def validate(data):
     """Raises if anything outside the vocabulary or a number would be sent."""
     assert set(data) == {"suspiciousdog", "agents", "turns", "days", "results"}
-    assert re.fullmatch(r"\d+\.\d+\.\d+", data["suspiciousdog"])
+    assert re.fullmatch(r"\d+\.\d+\.\d+((a|b|rc)\d+)?", data["suspiciousdog"])
     from .adapters import ADAPTERS
     for name, n in data["agents"].items():
         assert name in ADAPTERS and isinstance(n, int)
