@@ -1,0 +1,80 @@
+{"agent": "Fixed: the login form now rejects empty emails.", "reply": "still lets me in with an empty field", "label": "complaint"}
+{"agent": "Done. The chart now uses the new palette.", "reply": "no, the colors are the same as before", "label": "complaint"}
+{"agent": "I updated the query to filter by date.", "reply": "that's not what I asked, I wanted it grouped by week", "label": "complaint"}
+{"agent": "The build passes now.", "reply": "it fails on CI again, same error", "label": "complaint"}
+{"agent": "I removed the old endpoint and moved callers to v2.", "reply": "why did you delete it? other services still use it. put it back", "label": "complaint"}
+{"agent": "Deployed to production.", "reply": "I told you to deploy to staging first", "label": "complaint"}
+{"agent": "Here is the summary of the meeting.", "reply": "this is way too long, I said three lines", "label": "complaint"}
+{"agent": "Done, the modal closes on Escape.", "reply": "doesn't work on mobile", "label": "complaint"}
+{"agent": "Ho sistemato l'header, ora è fisso.", "reply": "non funziona, scorre ancora con la pagina", "label": "complaint"}
+{"agent": "Fatto, il pulsante ora è verde.", "reply": "no è rimasto blu", "label": "complaint"}
+{"agent": "Ho riscritto la funzione di calcolo dell'IVA.", "reply": "ti avevo detto di non toccare quella funzione", "label": "complaint"}
+{"agent": "Ecco la bozza della mail al cliente.", "reply": "troppo formale, e hai sbagliato il nome", "label": "complaint"}
+{"agent": "Ho aggiornato le dipendenze.", "reply": "adesso non parte più niente, torna indietro", "label": "complaint"}
+{"agent": "Pagina pubblicata.", "reply": "perché hai pubblicato senza chiedermelo?", "label": "complaint"}
+{"agent": "Il test ora passa.", "reply": "stesso problema di prima, hai solo cambiato il test", "label": "complaint"}
+{"agent": "I added retries to the HTTP client.", "reply": "wrong file, the client is in lib/net", "label": "complaint"}
+{"agent": "The importer now handles CSV with semicolons.", "reply": "still breaks on the file I sent you", "label": "complaint"}
+{"agent": "Ho tradotto il README in inglese.", "reply": "ma è una traduzione letterale, non si capisce niente", "label": "complaint"}
+{"agent": "Done. The cron runs every hour.", "reply": "stop. you just changed the prod schedule", "label": "complaint"}
+{"agent": "Fixed the typo in the footer.", "reply": "there are still two typos in the header you didn't see", "label": "complaint"}
+{"agent": "Done. I could also add caching to the API. Shall I?", "reply": "no", "label": "declines"}
+{"agent": "Fixed. Want me to refactor the helpers too?", "reply": "no thanks, that's enough", "label": "declines"}
+{"agent": "Shipped. Should I also write a migration guide?", "reply": "nope, nobody reads those", "label": "declines"}
+{"agent": "Ho finito. Vuoi che aggiunga anche i test end to end?", "reply": "no, non serve", "label": "declines"}
+{"agent": "Fatto il deploy. Procedo con la pulizia dei branch vecchi?", "reply": "no lascia stare", "label": "declines"}
+{"agent": "Ecco il preventivo. Lo mando io al cliente?", "reply": "no, lo mando io", "label": "declines"}
+{"agent": "Done. Do you want me to open a PR?", "reply": "no, I'll do it myself", "label": "declines"}
+{"agent": "Il logo è pronto. Faccio anche la versione animata?", "reply": "no grazie", "label": "declines"}
+{"agent": "I can also set up monitoring for this. Want me to?", "reply": "not needed", "label": "declines"}
+{"agent": "Vuoi che ti prepari anche un riassunto per il team?", "reply": "non serve, grazie", "label": "declines"}
+{"agent": "Report ready. Shall I schedule it weekly?", "reply": "no, one-off is fine", "label": "declines"}
+{"agent": "Fixed. Should I also bump the version?", "reply": "no don't", "label": "declines"}
+{"agent": "Done. I could also add dark mode. Shall I?", "reply": "later, put it on the backlog", "label": "defers"}
+{"agent": "Fixed the bug. Want me to look at the slow query too?", "reply": "not now, maybe next week", "label": "defers"}
+{"agent": "The draft is ready. Should I prepare the slides as well?", "reply": "let's do that tomorrow", "label": "defers"}
+{"agent": "Ho finito il modulo. Passo alle notifiche?", "reply": "più avanti, per ora fermati qui", "label": "defers"}
+{"agent": "Fatto. Vuoi che sistemi anche la pagina contatti?", "reply": "magari dopo, segnatelo tra le cose da fare", "label": "defers"}
+{"agent": "Posso anche ottimizzare le immagini. Procedo?", "reply": "non ora", "label": "defers"}
+{"agent": "Il server è su. Configuro anche il backup?", "reply": "lo facciamo un'altra volta", "label": "defers"}
+{"agent": "Done. Next I could migrate the old tables. Want me to?", "reply": "park that for now", "label": "defers"}
+{"agent": "I can write the docs for the API next. Shall I?", "reply": "some other time", "label": "defers"}
+{"agent": "Ho preparato la bozza. La rifinisco subito?", "reply": "per ora no, ci torniamo lunedì", "label": "defers"}
+{"agent": "Analysis done. Should I run it on last year's data too?", "reply": "not yet, first let me read this", "label": "defers"}
+{"agent": "Fatto il primo capitolo. Vado avanti con il secondo?", "reply": "lasciamo stare per oggi", "label": "defers"}
+{"agent": "Done. Shall I also add caching to the API?", "reply": "yes go ahead", "label": "accepts"}
+{"agent": "Fixed. Want me to deploy it?", "reply": "ok", "label": "accepts"}
+{"agent": "The plan is above. Shall I start with step one?", "reply": "perfect, go", "label": "accepts"}
+{"agent": "Ho finito. Procedo con il commit?", "reply": "sì vai", "label": "accepts"}
+{"agent": "Ecco la bozza. Va bene così?", "reply": "perfetto, grazie", "label": "accepts"}
+{"agent": "Fatto il deploy su staging.", "reply": "ottimo", "label": "accepts"}
+{"agent": "Done, all tests pass.", "reply": "great, thanks", "label": "accepts"}
+{"agent": "I can open the PR now. Do it?", "reply": "do it", "label": "accepts"}
+{"agent": "Vuoi che prepari anche la versione inglese?", "reply": "sì, fallo", "label": "accepts"}
+{"agent": "The migration ran fine.", "reply": "lgtm", "label": "accepts"}
+{"agent": "Procedo con la pubblicazione?", "reply": "certo, procedi", "label": "accepts"}
+{"agent": "Il preventivo è pronto in PDF.", "reply": "va bene così, grazie", "label": "accepts"}
+{"agent": "Done. Shall I push?", "reply": "yes push it", "label": "accepts"}
+{"agent": "Here are the three options. I'd go with the second.", "reply": "agreed, second one", "label": "accepts"}
+{"agent": "Fatto, ora la pagina carica in un secondo.", "reply": "bene, perfetto", "label": "accepts"}
+{"agent": "Ok, the export works now.", "reply": "nice", "label": "accepts"}
+{"agent": "Done. The form validates emails now.", "reply": "now add a phone number field with the same validation", "label": "new_request"}
+{"agent": "Fixed the header.", "reply": "next: the footer links point to the old domain", "label": "new_request"}
+{"agent": "The report is ready.", "reply": "can you also make me a chart of monthly revenue from the same data?", "label": "new_request"}
+{"agent": "Ho sistemato il menu.", "reply": "ora passiamo alla pagina prezzi: voglio tre colonne", "label": "new_request"}
+{"agent": "Fatto il logo.", "reply": "adesso fammi una ricerca sui concorrenti a Milano", "label": "new_request"}
+{"agent": "Deploy done.", "reply": "look at the settings page now, the toggles don't save", "label": "new_request"}
+{"agent": "Ecco il riassunto.", "reply": "scrivi una mail a Marco con questi punti", "label": "new_request"}
+{"agent": "The tests are green.", "reply": "write a short changelog entry for this release", "label": "new_request"}
+{"agent": "Ho aggiornato il calendario.", "reply": "mettimi anche un promemoria per venerdì alle 10", "label": "new_request"}
+{"agent": "Done with the refactor.", "reply": "how would we add SSO to this app?", "label": "new_request"}
+{"agent": "Il sito è online.", "reply": "quanto costerebbe al mese tenerlo su Vercel?", "label": "new_request"}
+{"agent": "Fixed the typo.", "reply": "translate the landing page into Spanish", "label": "new_request"}
+{"agent": "I found two ways to fix it: A rewrites the parser, B patches the regex.", "reply": "which one is safer?", "label": "other"}
+{"agent": "Done. The cache is now 5 minutes.", "reply": "why 5 and not 10?", "label": "other"}
+{"agent": "Ho finito l'analisi dei dati.", "reply": "quanti clienti ci sono in tutto?", "label": "other"}
+{"agent": "The server is up on port 3000.", "reply": "what's the password for the admin?", "label": "other"}
+{"agent": "Ecco le due bozze.", "reply": "mmm fammi pensare", "label": "other"}
+{"agent": "Done.", "reply": "wait, I'm checking", "label": "other"}
+{"agent": "Il file è in /srv/data/report.csv.", "reply": "dove l'hai preso questo dato?", "label": "other"}
+{"agent": "I pushed the branch.", "reply": "btw tomorrow I'm off", "label": "other"}

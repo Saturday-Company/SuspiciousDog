@@ -23,3 +23,6 @@ suspiciousdog = "suspiciousdog.cli:main"
 
 [tool.setuptools]
 packages = ["suspiciousdog", "suspiciousdog.adapters"]
+
+[tool.setuptools.package-data]
+suspiciousdog = ["data/*.jsonl"]

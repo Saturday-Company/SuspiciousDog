@@ -19,6 +19,7 @@ from . import journal
 from .kit import tokens
 
 VERDICTS = ("ballast", "rare", "elsewhere")
+CHEAP = 100         # tokens a session: something you do use, now and then, that costs less than this is worth keeping
 
 
 @dataclass
@@ -39,15 +40,34 @@ def attic():
     return journal.home() / "attic"
 
 
+def pruned():
+    """{key: journal entry} for what sdog took out and nobody put back."""
+    gone = journal.undone()
+    return {e["key"]: e for e in journal.read() if e.get("action") == "prune" and e["id"] not in gone and e.get("key")}
+
+
+def _saves(it, sessions):
+    return tokens(it.chars * it.loaded / max(sessions, 1))
+
+
+def cheap(items, sessions):
+    """Rarely used, but used, and light: a skill you reach for once a month is worth its line in the listing."""
+    return sorted((it for it in items.values() if it.verdict == "rare" and not it.origin.get("builtin")
+                   and _saves(it, sessions) < CHEAP), key=lambda it: -_saves(it, sessions))
+
+
 def proposals(items, sessions):
     """(proposals sdog can apply, things only you can do), biggest saving first."""
     mine, yours = [], []
+    light = {it.key for it in cheap(items, sessions)}
     for it in items.values():
-        if it.verdict not in VERDICTS or it.origin.get("builtin"):
+        if it.verdict not in VERDICTS or it.origin.get("builtin") or it.key in light or it.origin.get("pruned"):
+            continue
+        if it.origin.get("source", "").endswith(", disabled"):
             continue
         if it.origin.get("plugin") and f"plugin:{it.origin['plugin']}" in items:
             continue        # its plugin is the thing to switch off
-        saves = tokens(it.chars * it.loaded / max(sessions, 1))
+        saves = _saves(it, sessions)
         fix = it.origin.get("fix")
         why = it.why
         if fix and fix["type"] == "move":
@@ -118,6 +138,9 @@ def undo(entry):
         raise RuntimeError(f"entry {entry['id']} was already undone")
     if u["type"] == "run":
         _run(u["argv"])
+    elif u["type"] == "hooks":
+        from . import hooks
+        hooks.off(u["off"], record=False) if u.get("off") else hooks.on(u["on"], record=False)
     else:
         _move(u["from"], u["to"])
     return journal.write("undo", f"undid #{entry['id']}: {entry['what']}", entry.get("key", ""), None,

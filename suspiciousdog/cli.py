@@ -1,6 +1,7 @@
 """sdog: sniff your agent sessions for what actually works."""
 
 import argparse
+import io
 import json
 import os
 import re
@@ -220,16 +221,23 @@ SECTIONS = (
     ("misused", "MISUSED · fails far more often than your other tools"),
     ("earns", "EARNS ITS PLACE"),
     ("hook", "HOOKS"),
+    ("pruned", "PRUNED · taken out with sdog, measured in `sdog journal`"),
 )
+
+
+def _ledger(kits):
+    from . import kit
+    from .adapters import claude_code
+    from .service import origin
+    return kit.ledger(kits, claude_code.config(), origin())
 
 
 def _kit(args):
     from . import kit
-    from .adapters import claude_code
     kits = kit.scan(args.agent, args.path, args.project, cache=not args.no_cache)
     if not kits:
-        sys.exit("No sessions with a readable kit. For now that means Claude Code (`sdog doctor` says what I can read).")
-    items = kit.ledger(kits, claude_code.config(), claude_code.origin)
+        sys.exit("No sessions with a readable kit. `sdog doctor` says what I can read.")
+    items = _ledger(kits)
     return kits, items, kit.summary(kits, items)
 
 
@@ -393,6 +401,9 @@ def _change_rows(c):
     if not moved:
         out.append(_c(f"nothing moved ({c.before} turns before, {c.after} after)", "2"))
     b, a = c.medians.get("before", {}), c.medians.get("after", {})
+    if b.get("base") and a.get("base"):
+        out.append(_c(f"context at the start of a session: {_n(round(b['base']))} → {_n(round(a['base']))} tokens "
+                      f"(median, measured)", "2"))
     if b.get("tokens") and a.get("tokens"):
         out.append(_c(f"median turn: {_n(round(b['tokens']))} → {_n(round(a['tokens']))} output tokens, "
                       f"{b['minutes']:.1f} → {a['minutes']:.1f} min", "2"))
@@ -408,7 +419,7 @@ def cmd_timeline(args):
         print("\n  No changes I can see. Same kit from the first session to the last.\n")
         return
     turns, _ = load(args.agent, args.path, args.project)
-    timeline.measure(found, turns, days=args.days)
+    timeline.measure(found, turns, days=args.days, kits=kits)
     print(f"\n  {len(found)} changes to your kit, found in the transcripts and grouped by day. For each: your answers "
           f"in the {args.days} days before and after.")
     print(_c("  After is not because. Several changes close together can't be told apart.\n", "2"))
@@ -455,16 +466,8 @@ def cmd_rules(args):
 
 
 def _journal_changes():
-    from . import journal, timeline
-    gone = journal.undone()
-    out = []
-    for e in journal.read():
-        if e.get("action") in ("prune", "note"):
-            c = timeline.Change(journal.when(e), f"#{e['id']} {e['what']}" + (" (undone)" if e["id"] in gone else ""),
-                                "journal", [e.get("key", "")])
-            c.parts = [c.what]
-            out.append(c)
-    return out
+    from .service import journal_changes
+    return journal_changes()
 
 
 def _short_result(c):
@@ -488,7 +491,7 @@ def cmd_checkup(args):
     turns, per_agent = load(args.agent, args.path, args.project)
     if not kits and not turns:
         sys.exit("Nothing to sniff. No sessions found. Try `sdog demo`, or `sdog doctor` to see where I look.")
-    items = kit.ledger(kits, claude_code.config(), claude_code.origin) if kits else {}
+    items = _ledger(kits) if kits else {}
     s = kit.summary(kits, items)
     answered = sum(1 for t in turns if t.reply)
     agents = ", ".join(f"{a} {n}" for a, n in sorted(per_agent.items()))
@@ -525,7 +528,7 @@ def cmd_checkup(args):
         print(_c(f"{pad}→ sdog kit {misused[0].name}", "2"))
     found = timeline.changes(kits, claude_code.origin, claude_code.config())
     logged = _journal_changes()
-    timeline.measure(found + logged, turns)
+    timeline.measure(found + logged, turns, kits=kits)
     for i, c in enumerate(reversed(found[-3:])):
         line = f"{c.day}  {c.parts[0][:62]}" + (_c(f" +{len(c.parts) - 1} more", "2") if len(c.parts) > 1 else "")
         print(f"{pad}{line}") if i else head("CHANGED", line)
@@ -552,6 +555,10 @@ def cmd_checkup(args):
         print(_c(f'{pad}→ sdog show "{f}" --outcome {o}', "2"))
     if not kits and not (real or leads):
         print("  Too few turns for anything to stand out yet. `sdog sniff --all` shows every row.")
+    me = items.get("plugin:suspiciousdog") or next((it for it in rows if "suspiciousdog" in it.key.lower()), None)
+    if me and me.loaded:
+        head("ME", f"{me.kind} {me.name} · ~{_n(me.weight)} tok in {me.loaded} sessions, used in {me.used} · "
+                   f"{me.verdict}" + (". Fair is fair: prune me too." if me.verdict in ("ballast", "rare") else ""))
     print(f"\n  Nothing here changed anything. `sdog prune` asks before it does; `sdog report` draws it all.\n")
 
 
@@ -563,6 +570,7 @@ def cmd_prune(args):
         needle = args.name.lower()
         mine = [p for p in mine if needle in p.key.lower()]
         yours = [p for p in yours if needle in p.key.lower()]
+    light = [] if args.name else prune.cheap(items, s["sessions"])
     if not mine and not yours:
         print("\n  Nothing to prune. Everything you load, you use. Good dog.\n")
         return
@@ -580,6 +588,9 @@ def cmd_prune(args):
             print(f"      {p.what:<44} ~{_n(p.saves):>5} tok  {_c(p.hint, '2')}")
         if len(yours) > args.limit:
             print(_c(f"      + {len(yours) - args.limit} more (--limit)", "2"))
+    if light:
+        names = ", ".join(it.name for it in light[:6]) + (f" and {len(light) - 6} more" if len(light) > 6 else "")
+        print(_c(f"\n  Rarely used but light, so I'd keep them (under ~{prune.CHEAP} tokens a session each): {names}.", "2"))
     if not mine:
         print()
         return
@@ -628,9 +639,10 @@ def cmd_journal(args):
     if not entries:
         print(f"\n  The journal is empty. `sdog prune` and `sdog note` write to it ({journal.path()}).\n")
         return
+    from . import kit
     logged = _journal_changes()
     turns, _ = load(args.agent, args.path, args.project)
-    timeline.measure(logged, turns, days=args.days)
+    timeline.measure(logged, turns, days=args.days, kits=kit.scan(args.agent, args.path, args.project))
     by_id = {c.what.split(" ", 1)[0]: c for c in logged}
     print()
     for e in entries:
@@ -659,7 +671,7 @@ def cmd_undo(args):
         done = prune.undo(e)
     except RuntimeError as err:
         sys.exit(f"  Couldn't undo #{e['id']}: {err}")
-    print(f"\n  ✓ #{done['id']} {done['what']}. New sessions get it back.\n")
+    print(f"\n  ✓ #{done['id']} {done['what']}. It applies to new sessions.\n")
 
 
 def cmd_report(args):
@@ -669,7 +681,7 @@ def cmd_report(args):
     turns, _ = load(args.agent, args.path, args.project)
     found = timeline.changes(kits, claude_code.origin, claude_code.config())
     logged = _journal_changes()
-    timeline.measure(found + logged, turns)
+    timeline.measure(found + logged, turns, kits=kits)
     tables = lab.sniff(turns)
     habits = sorted(((o, f, r) for o, rs in tables.items() for f, r in rs if r["p"] < 0.05 and r["ratio"] > 1),
                     key=lambda x: x[2]["p"])
@@ -680,6 +692,171 @@ def cmd_report(args):
     print("  It holds project names and error messages: keep it to yourself; `sdog share` is for sharing.\n")
     if args.open:
         webbrowser.open(out.as_uri())
+
+
+def _hook_input():
+    """What Claude Code passes to a hook on stdin, or {}. Never waits more than a second for it."""
+    try:
+        if sys.stdin.isatty():
+            return {}
+        import select
+        if hasattr(sys.stdin, "fileno") and not select.select([sys.stdin], [], [], 1.0)[0]:
+            return {}
+        return json.loads(sys.stdin.read() or "{}")
+    except (ValueError, OSError, io.UnsupportedOperation):
+        return {}
+
+
+def cmd_brief(args):
+    from . import brief, hooks, service
+    if args.hook:                               # SessionStart: read the copy, never make the session wait
+        try:
+            cwd = _hook_input().get("cwd") or service.here()
+            text, fresh = brief.cached(service.needle(cwd))
+            if text is None:
+                text, fresh = brief.cached()
+            if not fresh:
+                hooks.detach("sentinel", "--refresh", "--cwd", cwd)
+            if text:
+                print(json.dumps({"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": text}}))
+        except Exception:
+            pass
+        return
+    state = service.State(args.agent, args.path, args.project)
+    cwd = service.here() if args.here else None
+    text, numbers = service.brief(state, cwd)
+    if not args.path and not args.project:
+        brief.save(text, numbers, service.needle(cwd) if cwd else None)
+    if args.json:
+        print(json.dumps({"text": text, **numbers}, indent=1))
+        return
+    if not text:
+        print("\n  Nothing to brief: no habit or tool stands out in your sessions yet. Good, or too few turns.\n")
+        return
+    print("\n" + "\n".join("  " + line for line in text.splitlines()))
+    print(_c(f"\n  ~{numbers['tokens']} tokens. To give it to every new session: sdog hooks on brief\n", "2"))
+
+
+def cmd_check(args):
+    from . import service
+    state = service.State(args.agent, args.path, args.project)
+    r = service.check_rule(state, " ".join(args.text), service.here())
+    if args.json:
+        print(json.dumps(r, indent=1, ensure_ascii=False))
+        return
+    color = {"already said": "1;33", "supported": "1;32", "weak": "33", "no evidence": "1;31"}[r["verdict"]]
+    print(f"\n  {_c(r['verdict'].upper(), color)}  {r['advice']}\n")
+    for a in r["already_loaded"]:
+        print(_c(f"    already loaded  {a['where']}: {a['text'][:110]}", "2"))
+    if r["corrections"]["count"]:
+        print(_c(f"    corrections     {r['corrections']['count']}, e.g. “{r['corrections']['examples'][-1][:100]}”", "2"))
+    for t in r["tools"]:
+        why = ", ".join(f"{k} {n}" for k, n in list(t["why"].items())[:3])
+        print(_c(f"    {t['name'][:30]:<30}  {t['calls']} calls, {t['fail_rate']:.1%} fail" + (f" ({why})" if why else ""), "2"))
+    print()
+
+
+def cmd_mcp(args):
+    from . import mcp_server
+    mcp_server.serve()
+
+
+def cmd_hooks(args):
+    from . import hooks
+    if not args.action:
+        on = hooks.status()
+        print()
+        for feature, state in on.items():
+            print(f"  {feature:<9} {_c('on', '1;32') if state else _c('off', '2')}")
+        print(_c(f"\n  In {hooks.settings_path()}. `sdog hooks on brief`, `sdog hooks off sentinel`.\n", "2"))
+        return
+    if not args.feature:
+        sys.exit("Which one? brief or sentinel.")
+    try:
+        e = (hooks.on if args.action == "on" else hooks.off)(args.feature)
+    except RuntimeError as err:
+        sys.exit(f"  {err}")
+    print(f"\n  ✓ #{e['id']} {e['what']}. New sessions get it; `sdog undo` reverts it.")
+    if args.feature == "brief" and args.action == "on":
+        print("  Cost: the brief (~250 tokens) in every new session. `sdog brief` shows what it says.")
+    print()
+
+
+def cmd_sentinel(args):
+    from . import hooks, sentinel
+    if args.hook == "end":
+        cwd = _hook_input().get("cwd") or ""
+        hooks.detach("sentinel", "--refresh", *(["--cwd", cwd] if cwd else []))
+        return
+    if args.hook == "start":
+        try:
+            text = sentinel.due()
+            if text:
+                print(json.dumps({"systemMessage": text}))
+        except Exception:
+            pass
+        return
+    if args.refresh:
+        sentinel.refresh(args.cwd)
+        return
+    st = sentinel.refresh()
+    print("\n  " + (st.get("pending") or "Nothing new to say: no change of yours has enough turns after it yet.") + "\n")
+
+
+def cmd_classify(args):
+    from . import classify
+    model = args.model or classify.DEFAULT_MODELS[args.backend]
+    if args.validate:
+        rows = classify.sample()
+        items = [classify._item(r["agent"], r["reply"]) for r in rows]
+        truth = [r["label"] for r in rows]
+    else:
+        turns, _ = _load(args)
+        answered, items = classify.items_for(turns)
+        if args.limit:
+            answered, items = answered[-args.limit:], items[-args.limit:]
+    todo = [it for i, it in enumerate(items) if i not in classify.cached(items, args.backend, model)]
+    e = classify.estimate(todo)
+    where = {"claude": "through your `claude` command", "anthropic": "to the Anthropic API",
+             "openai": f"to {args.url or 'http://localhost:11434/v1'}"}[args.backend]
+    if todo:
+        print(f"\n  {len(todo)} replies to label with {model}, {where}: ~{_n(e['tokens_in'])} tokens in, "
+              f"~{_n(e['tokens_out'])} out, {e['calls']} calls.")
+        print(_c("  What goes out: the end of each agent message and the reply (up to 300 characters each). "
+                 "Labels stay in a local cache.", "2"))
+        if not args.yes and (not sys.stdin.isatty() or input("  Go? [y/N] ").strip().lower() not in ("y", "yes")):
+            print("  Nothing sent.\n")
+            return
+    try:
+        labels = classify.label(items, args.backend, model, args.url,
+                                progress=lambda d, n: print(f"  labelled {d}/{n}", end="\r", flush=True))
+    except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as err:
+        sys.exit(f"\n  The classifier failed: {err}")
+    print()
+    if args.validate:
+        acc, per = classify.agreement(truth, labels)
+        regex = [classify.regex_label(r["agent"], r["reply"]) for r in rows]
+        racc, rper = classify.agreement(truth, regex)
+        print(f"\n  On {len(rows)} replies labelled by hand: {model} {acc:.0%} right, the regular expressions {racc:.0%}.\n")
+        print(f"    {'label':<12} {'model P/R':>12} {'regex P/R':>12}")
+        for name in classify.LABELS:
+            def pr(d):
+                return "/".join("–" if v is None else f"{v:.0%}" for v in (d["precision"], d["recall"]))
+            print(f"    {name:<12} {pr(per[name]):>12} {pr(rper[name]):>12}")
+        print()
+        return
+    by_turn = {id(t): label for t, label in zip(answered, labels)}
+    from collections import Counter
+    counts = Counter(labels)
+    print(f"\n  {len(labels)} replies: " + ", ".join(f"{n} {counts[n]}" for n in classify.LABELS if counts[n]))
+    tables = lab.sniff(answered, outcomes=classify.outcomes(by_turn))
+    for outcome, rows in tables.items():
+        shown = [r for r in rows if r[1]["p"] < 0.05][:6]
+        if shown:
+            print(f"\n  {_c(outcome + ' (read by ' + model + ')', '1')}")
+            for name, r in shown:
+                print(_row(name, r))
+    print(_c("\n  Same test as `sniff`, with the model's labels instead of the regular expressions.\n", "2"))
 
 
 def cmd_doctor(args):
@@ -790,6 +967,30 @@ def main(argv=None):
     s.add_argument("--out", help="where to write it (default ~/.local/share/suspiciousdog/report.html)")
     s.add_argument("--open", action="store_true", help="open it in the browser")
     s.add_argument("--no-cache", action="store_true")
+    s = add("brief", cmd_brief, "for agents: what your past sessions say, in a few lines (~250 tokens)")
+    s.add_argument("--here", action="store_true", help="for this project, if it has enough turns")
+    s.add_argument("--json", action="store_true")
+    s.add_argument("--hook", action="store_true", help=argparse.SUPPRESS)
+    s = add("check", cmd_check, "before adding a rule: does the problem show up, and is it already said?")
+    s.add_argument("text", nargs="+", help="the rule, as you'd write it")
+    s.add_argument("--json", action="store_true")
+    add("mcp", cmd_mcp, "run the MCP server (stdio): audit_setup, check_rule, evidence", sessions=False)
+    s = sub.add_parser("hooks", help="optional Claude Code hooks: brief, sentinel (off until you turn them on)")
+    s.set_defaults(fn=cmd_hooks)
+    s.add_argument("action", nargs="?", choices=["on", "off"])
+    s.add_argument("feature", nargs="?", choices=["brief", "sentinel"])
+    s = sub.add_parser("sentinel", help="what your last measured change did, in one line")
+    s.set_defaults(fn=cmd_sentinel)
+    s.add_argument("--hook", choices=["start", "end"], help=argparse.SUPPRESS)
+    s.add_argument("--refresh", action="store_true", help=argparse.SUPPRESS)
+    s.add_argument("--cwd", help=argparse.SUPPRESS)
+    s = add("classify", cmd_classify, "optional: a small model labels the replies (off unless you run it)")
+    s.add_argument("--backend", choices=["claude", "anthropic", "openai"], default="claude")
+    s.add_argument("--model", help="default: haiku (claude), claude-haiku-5-5 (anthropic), llama3.2 (openai)")
+    s.add_argument("--url", help="for openai-compatible servers, e.g. http://localhost:11434/v1")
+    s.add_argument("--validate", action="store_true", help="check it against 80 replies labelled by hand")
+    s.add_argument("--limit", type=int, help="only the last N replies")
+    s.add_argument("--yes", action="store_true", help="don't ask before sending")
     s = add("doctor", cmd_doctor, "what I can read, for each agent and format version", sessions=False)
     s.add_argument("--no-cache", action="store_true")
     s = sub.add_parser("provenance", help="experiment 1: names written from memory (Claude Code only)")

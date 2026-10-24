@@ -161,13 +161,19 @@ def changes(kits, origin=None, installed=None):
     return found
 
 
-def measure(found, turns, days=DAYS, outcomes=None):
-    """Before/after on the turns around each change, corrected across every change and outcome at once."""
+def measure(found, turns, days=DAYS, outcomes=None, kits=()):
+    """Before/after on the turns around each change, corrected across every change and outcome at once.
+
+    With the kits, also the context each session started with: the real weight of what came in or went out.
+    """
     outcomes = outcomes or ALL_OUTCOMES
     answered = [t for t in turns if t.reply and t.when]
+    starts = [(_when(k["start"]), k["session"], k["base_tokens"]) for k in kits if k.get("base_tokens")]
     every = []
     for c in found:
         lo, hi = c.when - timedelta(days=days), c.when + timedelta(days=days)
+        base = {"before": [b for w, s, b in starts if lo <= w < c.when and (c.sessions is None or s in c.sessions)],
+                "after": [b for w, s, b in starts if c.when <= w < hi and (c.sessions is None or s in c.sessions)]}
         near = [t for t in answered if lo <= t.when < hi and (c.sessions is None or t.session in c.sessions)]
         after = [t for t in near if t.when >= c.when]
         c.before, c.after = len(near) - len(after), len(after)
@@ -175,7 +181,8 @@ def measure(found, turns, days=DAYS, outcomes=None):
             tokens = [t.tokens for t in group if t.tokens]
             seconds = [t.seconds for t in group if t.seconds is not None]
             c.medians[side] = {"tokens": median(tokens) if tokens else None,
-                               "minutes": median(seconds) / 60 if seconds else None}
+                               "minutes": median(seconds) / 60 if seconds else None,
+                               "base": median(base[side]) if len(base[side]) >= 3 else None}
         c.rows = []
         if c.after >= MIN_AFTER and c.before >= MIN_AFTER:
             c.rows = [(name, compare(near, lambda t, m=c.when: t.when >= m, fn)) for name, fn in outcomes.items()]

@@ -197,6 +197,11 @@ def ledger(kits, installed=None, origin=None):
     for key, it in items.items():
         it.origin = origin(key, installed or {}) if origin else {}
     _plugins(items)
+    for key, it in items.items():
+        if key.startswith("plugin:") and origin:
+            o = origin(key, installed or {})
+            if not o.get("builtin"):
+                it.origin = {**it.origin, **o}
     judge(items)
     return items
 
@@ -223,7 +228,8 @@ def _plugins(items):
 
 
 def judge(items):
-    """ballast, rare, elsewhere, misused, earns, new; fixed for what is built in; weight and hook for the rest."""
+    """ballast, rare, elsewhere, misused, earns, new; fixed for what is built in; pruned for what sdog took out;
+    weight and hook for the rest."""
     calls = sum(it.calls for it in items.values() if it.kind in ("tool", "mcp"))
     errors = sum(it.errors for it in items.values() if it.kind in ("tool", "mcp"))
     for it in items.values():
@@ -232,6 +238,8 @@ def judge(items):
         if it.kind == "mcp" and it.calls >= 20 and it.error_rate >= max(2 * base, 0.05) and \
                 fisher(it.errors, it.calls - it.errors, others_errors, others_calls - others_errors) < 0.01:
             it.verdict, it.why = "misused", f"fails {it.error_rate:.1%} of the time, your other tools {base:.1%}"
+        elif it.origin.get("pruned"):
+            it.verdict, it.why = "pruned", "taken out with sdog: the journal measures what happened after"
         elif it.kind == "instructions":
             it.verdict, it.why = "weight", "loaded as written; whether it is followed comes in 0.2.0a2"
         elif it.kind == "tool":

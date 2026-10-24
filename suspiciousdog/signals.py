@@ -43,7 +43,7 @@ FACTORS = {
     "touches 5+ files": lambda t: len(t.files_written) >= 5,
     "40+ tool calls": lambda t: t.tool_calls >= 40,
     "under 5 tool calls": lambda t: 0 < t.tool_calls < 5,
-    "text only": lambda t: t.tool_calls == 0,
+    "text only": lambda t: t.tool_calls == 0 and bool(t.final.strip()),   # an empty turn is a failure, not text
     "3+ tool errors": lambda t: t.errors >= 3,
     "uses subagents": lambda t: t.uses(SUBAGENT),
     "plan mode": lambda t: t.uses(PLAN),

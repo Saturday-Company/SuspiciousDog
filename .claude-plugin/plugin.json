@@ -15,5 +15,18 @@
     "agents",
     "analytics",
     "privacy"
-  ]
+  ],
+  "mcpServers": {
+    "suspiciousdog": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "suspiciousdog",
+        "mcp"
+      ],
+      "env": {
+        "PYTHONPATH": "${CLAUDE_PLUGIN_ROOT}"
+      }
+    }
+  }
 }

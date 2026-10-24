@@ -303,6 +303,46 @@ def kit(path):
     return k
 
 
+def texts(path):
+    """{key: text} of what one session loaded: instruction files, MCP server instructions, skill descriptions.
+
+    For `check`: before adding a rule, is something like it already in the context?
+    """
+    out = {}
+    with open(path, errors="replace") as f:
+        for line in f:
+            if '"attachment"' not in line:
+                continue
+            try:
+                a = json.loads(line).get("attachment")
+            except (ValueError, AttributeError):
+                continue
+            if not isinstance(a, dict):
+                continue
+            t = a.get("type")
+            if t == "instructions":
+                for fl in a.get("files") or []:
+                    if isinstance(fl, dict) and fl.get("path"):
+                        out["instructions:" + _home(fl["path"])] = str(fl.get("content") or "")
+            elif t == "nested_memory" and a.get("path"):
+                content = a.get("content")
+                out["instructions:" + _home(a["path"])] = str((content.get("content") if isinstance(content, dict)
+                                                               else content) or "")
+            elif t == "mcp_instructions_delta":
+                for name, block in zip(a.get("addedNames") or [], a.get("addedBlocks") or []):
+                    out["mcp:" + server(name)] = str(block)
+            elif t == "skill_listing":
+                name = None
+                for row in str(a.get("content") or "").split("\n"):
+                    m = LISTED.match(row)
+                    if m:
+                        name = m.group(1)
+                        out["skill:" + name] = row
+                    elif name:
+                        out["skill:" + name] += "\n" + row
+    return out
+
+
 def kit_stamp(path):
     """Changes whenever the session or one of its subagents does: the cache key."""
     path = Path(path)
@@ -333,6 +373,12 @@ def config():
             found["plugin:" + plugin]["fix"] = {"type": "run", "argv": ["plugin", "disable", full, "-s", "user"],
                                                 "undo": ["plugin", "enable", full, "-s", "user"]}
     for p in sorted((root / "skills").glob("*/SKILL.md")):
+        if p.parent.is_symlink():   # installed by something else (a package, a dotfiles repo): it would come back
+            target = _home(os.path.realpath(p.parent))
+            found["skill:" + p.parent.name] = {"source": f"user skill, a link to {target}",
+                                              "remove": f"it is managed where {target} comes from; "
+                                                        f"remove the link {_home(str(p.parent))} if you're sure"}
+            continue
         found["skill:" + p.parent.name] = {"source": f"user skill {_home(str(p.parent))}",
                                           "remove": f"move {_home(str(p.parent))} into the project that uses it",
                                           "fix": {"type": "move", "path": str(p.parent), "what": "skills"}}

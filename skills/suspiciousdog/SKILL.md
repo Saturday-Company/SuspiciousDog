@@ -35,6 +35,14 @@ Anywhere else, if installed: `sdog <command>`. Commands:
 - `prune` — proposals to disable plugins, remove user MCP servers, move user skills away. Without `--apply` it only
   lists. `undo`, `note "text" [--key ITEM]`, `journal`.
 - `report [--out FILE]` — one static HTML page with everything, written to disk.
+- `brief [--here] [--json]` — what the user's past sessions say, in a few lines (~250 tokens): habits that go with
+  worse answers, tools that keep failing and what to do about it. Every line stands on counts.
+- `check "RULE TEXT" [--json]` — before adding a rule: is something like it already loaded, do the user's
+  corrections say it, do the tools it names fail for a reason it would fix? Verdict: already said, supported, weak,
+  no evidence.
+- `hooks [on|off] brief|sentinel` — optional Claude Code hooks, off by default: the brief at the start of each
+  session, and the sentinel (one line a week on what a change did). Each is journaled, `undo` reverts it.
+- `mcp` — the same answers as an MCP server: `audit_setup`, `check_rule`, `evidence`.
 - `demo` — synthetic data, clearly labelled.
 - `share` — sends counts only, after showing them. Never run it without the user's explicit yes in this conversation.
 
@@ -61,10 +69,18 @@ Anywhere else, if installed: `sdog <command>`. Commands:
 6. Failures come with a reason (auth, wrong arguments, bad code, not found, wrong target, setup, blocked, timeout,
    server). Auth and server are configuration; the others are usually the agent, and a short rule can fix them.
    Propose the rule; don't write it into the user's files without asking.
-7. Before the user adds a rule, run `rules` and `timeline`: has a similar rule been repeated, or changed nothing?
+7. Before the user adds a rule, run `check "the rule"` (or the `check_rule` tool) and tell them the verdict with
+   its numbers: "already said" means make the existing line more concrete instead; "no evidence" means it would
+   cost tokens in every session for a problem their sessions don't show. Then `rules` and `timeline`: has a similar
+   rule been repeated, or changed nothing?
 8. `timeline` says "after", never "because". Changes on the same day can't be told apart. Under 100 turns it says
    "too early": repeat that, don't guess.
 9. Run `prune` without `--apply` to show the proposals. Run `prune --apply N` only for the numbers the user picked
    in this conversation, never on your own. Same for `undo`. After the user disconnects something by hand, offer
    `note` so it gets measured.
 10. The report holds project names and error messages: never upload or paste it anywhere.
+11. Before recommending or installing a plugin, skill or MCP server, look it up with `kit NAME` (or `evidence`): if
+    the user already has something similar that is ballast, say so.
+12. The brief is evidence about this user, not a rulebook: follow it where it applies, and never paste it into their
+    files. Turning the hooks on is the user's choice; say what each costs (the brief ~250 tokens a session).
+13. SuspiciousDog shows up in its own kit. If it is ballast for this user, say that too.
