@@ -10,6 +10,8 @@ on:
 permissions:
   contents: read
   issues: read
+  pages: read
+  deployments: read
 concurrency:
   group: pages
   cancel-in-progress: false
