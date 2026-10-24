@@ -106,7 +106,12 @@ def _remember(pairs, backend, model):
 
 def _parse(text, n):
     m = re.search(r"\[.*\]", text or "", re.S)
-    labels = json.loads(m.group(0)) if m else []
+    try:
+        labels = json.loads(m.group(0)) if m else []
+    except ValueError:
+        labels = []
+    if not isinstance(labels, list):
+        labels = []
     if len(labels) != n:
         raise RuntimeError(f"the model answered {len(labels)} labels for {n} replies")
     return [lab if lab in LABELS else "other" for lab in labels]
@@ -117,9 +122,13 @@ def _prompt(batch):
 
 
 def _claude(batch, model, url=None):
+    """--restricted skips your settings (so your hooks, and sdog's own, don't run), an empty folder keeps project
+    files out: the call carries the system prompt, the batch, and the account email Claude Code adds by itself."""
+    import tempfile
     cmd = [os.environ.get("SDOG_CLAUDE", "claude"), "-p", "--model", model, "--system-prompt", SYSTEM, "--tools", "",
-           "--strict-mcp-config", "--no-session-persistence", "--output-format", "json"]
-    done = subprocess.run(cmd, input=_prompt(batch), capture_output=True, text=True, timeout=300)
+           "--restricted", "--strict-mcp-config", "--no-session-persistence", "--output-format", "json"]
+    with tempfile.TemporaryDirectory(prefix="sdog-classify-") as empty:
+        done = subprocess.run(cmd, input=_prompt(batch), capture_output=True, text=True, timeout=300, cwd=empty)
     if done.returncode != 0:
         raise RuntimeError((done.stderr or done.stdout).strip()[:300])
     return json.loads(done.stdout).get("result", "")

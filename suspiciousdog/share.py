@@ -9,6 +9,7 @@ from .signals import FACTORS, OUTCOMES
 
 REPO = "Saturday-Company/SuspiciousDog"
 MAX_URL = 7500
+CAP = 10 ** 7       # no honest share counts more turns, sessions or calls than this
 
 
 def slug(name):
@@ -73,20 +74,28 @@ def validate(data):
         kit = data["kit"]
         assert data["format"] == 2
         assert set(kit) == {"sessions", "context_tokens", "ballast_tokens", "private_items", "items"}
-        assert all(isinstance(kit[k], int) and kit[k] >= 0 for k in kit if k != "items")
+        assert all(_count(kit[k]) for k in kit if k != "items")
         for row in kit["items"]:
             name, *counts = row
             assert isinstance(name, str) and public.allowed(name), name
-            assert len(counts) == 5 and all(isinstance(c, int) and c >= 0 for c in counts)
+            assert len(counts) == 5 and all(_count(c) for c in counts)
+            loaded, used, calls, errors, _ = counts
+            assert used <= loaded and errors <= calls
     from .adapters import ADAPTERS
     for name, n in data["agents"].items():
-        assert name in ADAPTERS and isinstance(n, int)
-    assert isinstance(data["turns"], int) and isinstance(data["days"], int)
+        assert name in ADAPTERS and _count(n)
+    assert _count(data["turns"]) and _count(data["days"])
     for row in data["results"]:
         factor, outcome, *counts = row
         assert factor in FACTOR_SLUGS and outcome in OUTCOME_SLUGS
-        assert len(counts) == 4 and all(isinstance(c, int) and c >= 0 for c in counts)
+        assert len(counts) == 4 and all(_count(c) for c in counts)
+        n_with, hits_with, n_without, hits_without = counts
+        assert hits_with <= n_with and hits_without <= n_without
     return True
+
+
+def _count(x):
+    return isinstance(x, int) and not isinstance(x, bool) and 0 <= x <= CAP
 
 
 def issue_url(data):

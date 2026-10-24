@@ -19,8 +19,9 @@ Custom hypotheses from `sdog test` are never included.
 
 Format 2 (0.2.0) adds counts about the kit: for each item with a public name, sessions that loaded it, sessions that
 used it, calls, failures and its weight in tokens. Public means on the fixed lists in `suspiciousdog/public.py`:
-built-in tools and subagents, MCP servers from public directories, plugins from public marketplaces, skills that
-ship with Claude Code or claude.ai. Your own skills, private plugins, connectors you named yourself, instruction
+built-in tools and subagents, MCP servers from public directories, plugins from Anthropic's public marketplaces
+(checked by the repository they were added from, not by their name), skills that ship with Claude Code or
+claude.ai. Your own skills, private plugins, connectors you named yourself, instruction
 files, hooks and paths never leave; they are counted as one number, `private_items`. `share.validate()` rejects any
 other name, and `tests/test_kit_other.py` checks it with private names that must not come out.
 
@@ -28,7 +29,9 @@ other name, and `tests/test_kit_other.py` checks it with private names that must
 
 Off unless you run it. It sends, for each reply it labels, the last 300 characters of the agent's message and the
 first 300 of your reply to the model you choose: through your own `claude` command (Haiku by default, under your
-account's terms), to the Anthropic API with your key, or to an OpenAI-compatible endpoint such as a local model. It
+account's terms; it runs with `--restricted` in an empty folder, so your settings, hooks and CLAUDE.md files stay
+out, and Claude Code itself adds your account email as context), to the Anthropic API with your key, or to an
+OpenAI-compatible endpoint such as a local model. It
 says how many replies and roughly how many tokens before it sends anything, and asks. Labels are kept in
 `~/.cache/suspiciousdog/labels.sqlite` so nothing is sent twice. `--validate` sends only the 80 made-up replies in
 `suspiciousdog/data/labels.jsonl`.
@@ -43,6 +46,8 @@ says how many replies and roughly how many tokens before it sends anything, and 
 - `~/.local/share/suspiciousdog/attic/`: skills and subagents that `prune` put away.
 - `~/.cache/suspiciousdog/brief*.json`, `sentinel.json`, `labels.sqlite`: the last brief, the sentinel's state, the
   classifier's labels.
+- `~/.local/share/suspiciousdog/attic/settings.json.*`: a copy of `~/.claude/settings.json` from before each
+  `sdog hooks on|off`, readable by you only, since settings can hold tokens. Delete them when you like.
 - `~/.local/share/suspiciousdog/report.html`: written by `sdog report`. It holds project names and error messages.
   It loads nothing from the network. Don't post it; `sdog share` is the thing for sharing.
 
@@ -55,5 +60,5 @@ SuspiciousDog writes outside the folders above. `sdog mcp` only reads.
 
 They stay public in the repository's issues. A GitHub Action in this repository (`.github/workflows/pack.yml`)
 adds up the valid ones and publishes the pack page on GitHub Pages; an issue only counts if `share.validate()`
-accepts it. No accounts, no tracking, no analytics. To remove your contribution, close or delete your issue,
+accepts it, and only the latest open share of each GitHub account counts. No accounts, no tracking, no analytics. To remove your contribution, close or delete your issue,
 or ask us to and we'll do it.

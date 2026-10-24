@@ -76,6 +76,32 @@ class Scan(unittest.TestCase):
         self.assertEqual(items["mcp:github"].errors, 2)              # one from Codex, one from Gemini
 
 
+class Robust(unittest.TestCase):
+    def test_a_broken_file_is_skipped(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            (Path(tmp) / "good.jsonl").write_text((HERE / "codex-rollout.jsonl").read_text())
+            (Path(tmp) / "bad.jsonl").write_text('{"type": "session", "id": "x"}\n{"type": "user", "text": null, "ts": 5}\n'
+                                                 '{"type": "tool_call", "name": "x", "ts": 6}\n')
+            old = os.environ.get("SDOG_NO_CACHE")
+            os.environ["SDOG_NO_CACHE"] = "1"
+            try:
+                kits = kit.scan(path=tmp)
+                from suspiciousdog.adapters import load
+                load(path=tmp)
+            finally:
+                os.environ.pop("SDOG_NO_CACHE") if old is None else os.environ.__setitem__("SDOG_NO_CACHE", old)
+        self.assertIn("codex", {k["agent"] for k in kits})
+
+    def test_pruned_expires_when_it_comes_back(self):
+        kits = [{"agent": "claude-code", "session": f"s{i}", "project": "/p", "start": f"2026-10-{1 + i:02d}",
+                 "base_tokens": 1, "loaded": {"skill:x": 100}, "used": {}, "errors": {}, "retries": {}, "denied": {},
+                 "samples": {}, "attachments": {}} for i in range(25)]
+        items = kit.ledger(kits, {}, lambda key, installed: {"pruned": "2026-10-10"})
+        self.assertEqual(items["skill:x"].verdict, "ballast")       # loaded again after the prune: re-enabled
+        items = kit.ledger(kits, {}, lambda key, installed: {"pruned": "2026-10-28"})
+        self.assertEqual(items["skill:x"].verdict, "pruned")
+
+
 class Config(unittest.TestCase):
     def test_gemini_config_has_undo(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -133,6 +159,6 @@ class ShareV2(unittest.TestCase):
                         "items": [["skill:preventivo-saturday", 1, 0, 0, 0, 10]]}}
         with self.assertRaises(AssertionError):
             share.validate(data)
-        data["kit"]["items"] = [["plugin:secret@acme-market", 1, 0, 0, 0, 10]]
+        data["kit"]["items"] = [["plugin:secret@claude-plugins-official", 1, 0, 0, 0, 10]]   # a name, not a repo
         with self.assertRaises(AssertionError):
             share.validate(data)

@@ -50,7 +50,19 @@ def line(c):
 
 
 def refresh(cwd=None):
-    """After a session: warm the cache, rebuild the briefs, find what is newly measurable."""
+    """After a session: warm the cache, rebuild the briefs, find what is newly measurable. One at a time."""
+    import fcntl
+    lock_path = brief.cache_dir() / "sentinel.lock"
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(lock_path, "w") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            return _state()             # another refresh is already running
+        return _refresh(cwd)
+
+
+def _refresh(cwd):
     state = service.State()
     text, numbers = service.brief(state)
     brief.save(text, numbers)

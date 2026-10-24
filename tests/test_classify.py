@@ -17,8 +17,10 @@ class Classify(unittest.TestCase):
         self.calls = root / "calls"
         fake = root / "claude"
         # Answers "accepts" for every item it gets, and writes down each call.
-        fake.write_text("#!/usr/bin/env python3\nimport json, sys\nitems = json.loads(sys.stdin.read())\n"
+        self.argv = root / "argv"
+        fake.write_text("#!/usr/bin/env python3\nimport json, os, sys\nitems = json.loads(sys.stdin.read())\n"
                         f"open({str(self.calls)!r}, 'a').write('x')\n"
+                        f"open({str(self.argv)!r}, 'w').write(json.dumps([sys.argv[1:], os.getcwd()]))\n"
                         "print(json.dumps({'result': json.dumps(['accepts'] * len(items))}))\n")
         fake.chmod(fake.stat().st_mode | stat.S_IEXEC)
         self.env = {"SDOG_CLAUDE": str(fake), "XDG_CACHE_HOME": str(root / "cache")}
@@ -47,6 +49,12 @@ class Classify(unittest.TestCase):
         self.assertEqual(self.calls.read_text(), "xx")             # 50 items, batches of 40
         classify.label(items)
         self.assertEqual(self.calls.read_text(), "xx")             # the second time, all from the cache
+
+    def test_claude_runs_restricted_in_an_empty_folder(self):
+        classify.label([classify._item("Fixed.", "argv check")])
+        argv, cwd = json.loads(self.argv.read_text())
+        self.assertIn("--restricted", argv)
+        self.assertIn("sdog-classify-", cwd)
 
     def test_miscount_splits_the_batch(self):
         answers = iter(['["accepts"]', '["complaint"]', '["accepts", "accepts", "accepts"]'])

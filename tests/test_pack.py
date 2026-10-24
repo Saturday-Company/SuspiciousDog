@@ -15,8 +15,9 @@ GOOD = {"suspiciousdog": "0.2.0", "agents": {"claude-code": 40}, "turns": 300, "
                              "items": [["mcp:gamma", 38, 0, 0, 0, 600], ["tool:Bash", 40, 40, 900, 30, 0]]}}
 
 
-def issue(body, n, labels=("results",)):
-    return json.dumps({"number": n, "body": body, "labels": [{"name": x} for x in labels]})
+def issue(body, n, labels=("results",), user=None, state="open"):
+    return json.dumps({"number": n, "body": body, "labels": [{"name": x} for x in labels], "state": state,
+                       "user": {"login": user or f"u{n}"}})
 
 
 def block(data):
@@ -30,14 +31,23 @@ class Pack(unittest.TestCase):
         evil["results"][0][0] = "<img src=x onerror=alert(1)>"
         private = json.loads(json.dumps(GOOD))
         private["kit"]["items"].append(["skill:preventivo-saturday", 1, 0, 0, 0, 50])
-        lines = [issue(block(GOOD), 1), issue(block(GOOD), 2),            # the same share twice: once
-                 issue(block(other), 3), issue(block(evil), 4), issue(block(private), 5),
-                 issue(block(other), 6, labels=("results", "invalid")), issue("no json here", 7), "not json"]
+        impossible = json.loads(json.dumps(GOOD))
+        impossible["results"][0] = ["ends_offering_more_work", "deferral", 10, 50, 10, 1]   # 50 hits in 10 turns
+        huge = json.loads(json.dumps(GOOD))
+        huge["results"][0] = ["ends_offering_more_work", "deferral", 10 ** 9, 1, 10, 1]
+        boolean = dict(GOOD, turns=True)
+        lines = [issue(block(GOOD), 1, user="ann"), issue(block(other), 2, user="ann"),   # one person: once, the latest
+                 issue(block(other), 3, user="bob"), issue(block(evil), 4), issue(block(private), 5),
+                 issue(block(impossible), 6), issue(block(huge), 7), issue(block(boolean), 8),
+                 issue(block(other), 9, labels=("results", "invalid")), issue(block(GOOD), 10, state="closed"),
+                 issue("no json here", 11), "not json"]
         found = pack.shares(lines)
         self.assertEqual(len(found), 2)
+        self.assertEqual({d["turns"] for d in found}, {301})
 
     def test_page(self):
         found = pack.shares([issue(block(GOOD), 1), issue(block(dict(GOOD, turns=301)), 2)])
+        self.assertEqual(len(found), 2)
         p = pack.add_up(found)
         self.assertEqual(p["shares"], 2)
         self.assertEqual(p["turns"], 601)
@@ -48,6 +58,15 @@ class Pack(unittest.TestCase):
         self.assertIn("What the pack found", html)
         self.assertNotIn("<script>alert", html)
         self.assertNotIn("preventivo", html)
+
+
+    def test_empty_page(self):
+        import tempfile, os
+        with tempfile.TemporaryDirectory() as tmp:
+            src = Path(tmp) / "issues.jsonl"
+            src.write_text("")
+            pack.main(src, Path(tmp) / "site")
+            self.assertIn("No shares right now", (Path(tmp) / "site" / "index.html").read_text())
 
 
 if __name__ == "__main__":

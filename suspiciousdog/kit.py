@@ -70,8 +70,12 @@ class Cache:
 
 
 def _read(job):
+    """One file's kit, or None: a file an adapter can't read is skipped, not fatal."""
     name, f = job
-    return ADAPTERS[name].kit(f)
+    try:
+        return ADAPTERS[name].kit(f)
+    except Exception:
+        return None
 
 
 def scan(agent=None, path=None, project=None, cache=True):
@@ -99,11 +103,13 @@ def scan(agent=None, path=None, project=None, cache=True):
         except (OSError, RuntimeError, BrokenProcessPool):
             fresh = [_read(job) for job in jobs]
         for (_, f, stamp), k in zip(todo, fresh):
+            if k is None:
+                continue
             store.put(f, stamp, k)
             kits.extend(k if isinstance(k, list) else [k])
     store.close()
-    return sorted((k for k in kits if k["start"] and (k["base_tokens"] is not None or k["used"])),
-                  key=lambda k: k["start"])
+    return sorted((k for k in kits if isinstance(k.get("start"), str) and k["start"] and
+                   (k["base_tokens"] is not None or k["used"])), key=lambda k: k["start"])
 
 
 # --- the ledger ---
@@ -238,7 +244,7 @@ def judge(items):
         if it.kind == "mcp" and it.calls >= 20 and it.error_rate >= max(2 * base, 0.05) and \
                 fisher(it.errors, it.calls - it.errors, others_errors, others_calls - others_errors) < 0.01:
             it.verdict, it.why = "misused", f"fails {it.error_rate:.1%} of the time, your other tools {base:.1%}"
-        elif it.origin.get("pruned"):
+        elif it.origin.get("pruned") and not it.last > str(it.origin["pruned"]):
             it.verdict, it.why = "pruned", "taken out with sdog: the journal measures what happened after"
         elif it.kind == "instructions":
             it.verdict, it.why = "weight", "loaded as written; whether it is followed comes in 0.2.0a2"

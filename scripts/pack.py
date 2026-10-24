@@ -1,6 +1,6 @@
 """The pack page: every share, added up. Run by .github/workflows/pack.yml; locally:
 
-    gh api --paginate "repos/Saturday-Company/SuspiciousDog/issues?labels=results&state=all&per_page=100" \
+    gh api --paginate "repos/Saturday-Company/SuspiciousDog/issues?labels=results&state=open&per_page=100" \
         --jq '.[]' > issues.jsonl
     python scripts/pack.py issues.jsonl site
 
@@ -26,14 +26,14 @@ MIN_SHARES_FOR_ITEM = 2     # a public item shows up once two people have it: on
 
 
 def shares(lines):
-    """Valid payloads from the issues, one per issue, duplicates dropped."""
-    seen, out = set(), []
+    """Valid payloads from the open issues: the latest one per GitHub account, so one person counts once."""
+    latest = {}
     for line in lines:
         try:
             issue = json.loads(line)
         except ValueError:
             continue
-        if not isinstance(issue, dict) or issue.get("pull_request"):
+        if not isinstance(issue, dict) or issue.get("pull_request") or issue.get("state", "open") != "open":
             continue
         if any(label.get("name") in ("invalid", "spam") for label in issue.get("labels") or []):
             continue
@@ -45,11 +45,10 @@ def shares(lines):
             share.validate(data)
         except (ValueError, AssertionError, TypeError, KeyError, AttributeError):
             continue
-        fingerprint = json.dumps(data, sort_keys=True)
-        if fingerprint not in seen:
-            seen.add(fingerprint)
-            out.append(data)
-    return out
+        who = str((issue.get("user") or {}).get("login") or f"issue-{issue.get('number')}")
+        if who not in latest or issue.get("number", 0) > latest[who][0]:
+            latest[who] = (issue.get("number", 0), data)
+    return [data for _, data in latest.values()]
 
 
 def add_up(found):
@@ -71,8 +70,12 @@ def add_up(found):
     rows = []
     for (f, o), (nw, hw, nwo, hwo, n, up) in cells.items():
         if nw >= 10 and nwo >= 10:
+            try:
+                p = fisher(hw, nw - hw, hwo, nwo - hwo)
+            except (ValueError, OverflowError):
+                continue
             rows.append({"factor": f, "outcome": o, "with": hw / nw, "without": hwo / nwo, "turns": nw,
-                         "p": fisher(hw, nw - hw, hwo, nwo - hwo), "shares": n, "same_way": up})
+                         "p": p, "shares": n, "same_way": up})
     benjamini_hochberg(rows)
     rows.sort(key=lambda r: r["p"])
     items = {}
@@ -145,17 +148,24 @@ def page(pack):
     return "".join(out)
 
 
+EMPTY = (f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' "
+         f"content='width=device-width,initial-scale=1'><title>The pack</title><style>{CSS}</style></head><body><main>"
+         "<h1>What the pack found</h1><p class='mute'>No shares right now. <code>sdog share</code> adds yours.</p>"
+         "</main></body></html>")
+
+
 def main(source, target):
     found = shares(Path(source).read_text().splitlines())
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a") as f:
             f.write(f"shares={len(found)}\n")
     print(f"{len(found)} valid shares")
-    if not found:
-        return
-    pack = add_up(found)
     out = Path(target)
     out.mkdir(parents=True, exist_ok=True)
+    if not found:           # written, but deployed only if the page was already up (see pack.yml)
+        (out / "index.html").write_text(EMPTY)
+        return
+    pack = add_up(found)
     (out / "index.html").write_text(page(pack))
     (out / "pack.json").write_text(json.dumps(pack, indent=1))
 

@@ -105,7 +105,7 @@ def _tools(items):
 
 def build(turns, items=None, project=None, labels=None):
     """The brief as text, and the numbers behind it. With a classifier's labels, habits are read from those."""
-    scoped = [t for t in turns if project and project in t.project]
+    scoped = [t for t in turns if project and t.project == project]
     used = scoped if sum(1 for t in scoped if t.reply) >= MIN_PROJECT_TURNS else turns
     answered = sum(1 for t in used if t.reply)
     outcomes = None

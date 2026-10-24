@@ -1,12 +1,12 @@
 ---
 description: Sniff your agent sessions for what actually works (SuspiciousDog)
 argument-hint: "[checkup|kit [NAME]|check RULE|brief|timeline|prune|sniff|show FACTOR|report|doctor] [--project NAME]"
-allowed-tools: Bash(PYTHONPATH=* python3 -m suspiciousdog:*)
+allowed-tools: Bash(python3 -I *scripts/run.py:*)
 ---
 
 Run SuspiciousDog on the user's sessions and explain what it found.
 
-1. Run: `PYTHONPATH="${CLAUDE_PLUGIN_ROOT}" python3 -m suspiciousdog $ARGUMENTS` (no arguments means the checkup).
+1. Run: `python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/run.py" $ARGUMENTS` (no arguments means the checkup).
 2. For each `real` finding, run `show "<factor>" --outcome <outcome>` and read the turns before you explain it.
 3. Report briefly: the findings that survived, what the turns show, one change worth trying, and that it can be
    checked later with `before-after`. Say "vibes" for everything else.

@@ -32,13 +32,14 @@ def origin():
         if key in gone and key not in installed:
             e = gone[key]
             return {"source": f"taken out with sdog on {e['at'][:10]} (journal #{e['id']})", "remove": "",
-                    "pruned": True}
+                    "pruned": e["at"][:10]}
         ext = re.match(r"instructions:~/\.gemini/extensions/([^/]+)/", key)
         if ext and key not in installed:
             return {**installed.get("plugin:" + ext.group(1), {"source": f"Gemini CLI extension {ext.group(1)}",
                                                                "remove": ""}), "plugin": ext.group(1)}
         found = claude_code.origin(key, installed)
-        return {**found, "pruned": True} if key in gone or f"plugin:{found.get('plugin')}" in gone else found
+        e = gone.get(key) or gone.get(f"plugin:{found.get('plugin')}")
+        return {**found, "pruned": e["at"][:10]} if e else found
     return find
 
 
@@ -49,8 +50,9 @@ def journal_changes():
     out = []
     for e in journal.read():
         if e.get("action") in ("prune", "note", "hook"):
+            agent = None if e["action"] == "note" else (e.get("undo") or {}).get("bin") or "claude-code"
             c = timeline.Change(journal.when(e), f"#{e['id']} {e['what']}" + (" (undone)" if e["id"] in gone else ""),
-                                "journal", [e.get("key", "")])
+                                "journal", [e.get("key", "")], agent=agent)
             c.parts = [c.what]
             out.append(c)
     return out
@@ -172,7 +174,7 @@ def find(items, name):
 
 def evidence(state, name):
     """Everything about one item: weight, use, failures and what happened when it came or went."""
-    found = find(state.items, name)
+    found = find(state.items, name) if name.strip() else []
     if not found:
         return {"error": f"nothing in the kit matches {name!r}", "hint": "call audit_setup for the list"}
     it, s = found[0], state.summary

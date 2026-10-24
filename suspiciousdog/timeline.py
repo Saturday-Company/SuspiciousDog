@@ -32,6 +32,7 @@ class Change:
     after: int = 0
     medians: dict = field(default_factory=dict)
     together: list = field(default_factory=list)
+    agent: str | None = None        # the agent it happened to, when it is one: its context is the one measured
 
     @property
     def day(self):
@@ -78,7 +79,9 @@ def _items(kits, origin, installed):
             what = f"{kind} " + ", ".join(f"{n} {k}{'s' if n > 1 else ''}" for k, n in kinds.most_common())
         if label:
             what += f" ({label})"
-        changes.append(Change(_when(min(stamp for _, stamp in members)), what, kind, keys))
+        first = min(stamp for _, stamp in members)
+        agent = next((k["agent"] for k in full if k["start"] == first), None)
+        changes.append(Change(_when(first), what, kind, keys, agent=agent))
     return changes
 
 
@@ -101,7 +104,7 @@ def _edits(kits):
             if abs(delta) < MIN_EDIT:
                 continue
             changes.append(Change(_when(k["start"]), f"edited {key.split(':', 1)[1]} ({delta:+,} chars)", "edited",
-                                  [key], sessions=scope))
+                                  [key], sessions=scope, agent=k["agent"]))
     return changes
 
 
@@ -151,9 +154,10 @@ def changes(kits, origin=None, installed=None):
     found = []
     for (_, scope), group in days.items():
         kinds = {c.kind for c in group}
+        agents = {c.agent for c in group}
         found.append(Change(group[0].when, "; ".join(c.what for c in group), kinds.pop() if len(kinds) == 1 else "mixed",
                             [k for c in group for k in c.keys], sessions=set(scope) if scope else None,
-                            parts=[c.what for c in group]))
+                            parts=[c.what for c in group], agent=agents.pop() if len(agents) == 1 else None))
     found.sort(key=lambda c: c.when)
     for c in found:
         c.together = [o.what for o in found if o is not c and o.sessions is None
@@ -168,12 +172,13 @@ def measure(found, turns, days=DAYS, outcomes=None, kits=()):
     """
     outcomes = outcomes or ALL_OUTCOMES
     answered = [t for t in turns if t.reply and t.when]
-    starts = [(_when(k["start"]), k["session"], k["base_tokens"]) for k in kits if k.get("base_tokens")]
+    starts = [(_when(k["start"]), k["session"], k["base_tokens"], k["agent"]) for k in kits if k.get("base_tokens")]
     every = []
     for c in found:
         lo, hi = c.when - timedelta(days=days), c.when + timedelta(days=days)
-        base = {"before": [b for w, s, b in starts if lo <= w < c.when and (c.sessions is None or s in c.sessions)],
-                "after": [b for w, s, b in starts if c.when <= w < hi and (c.sessions is None or s in c.sessions)]}
+        mine = [(w, b) for w, s, b, a in starts if (c.sessions is None or s in c.sessions)
+                and (c.agent is None or a == c.agent)]
+        base = {"before": [b for w, b in mine if lo <= w < c.when], "after": [b for w, b in mine if c.when <= w < hi]}
         near = [t for t in answered if lo <= t.when < hi and (c.sessions is None or t.session in c.sessions)]
         after = [t for t in near if t.when >= c.when]
         c.before, c.after = len(near) - len(after), len(after)

@@ -66,7 +66,7 @@ class Server:
         method, mid = msg.get("method"), msg.get("id")
         if mid is None:
             return None
-        params = msg.get("params") or {}
+        params = msg.get("params") if isinstance(msg.get("params"), dict) else {}
         if method == "initialize":
             asked = params.get("protocolVersion")
             return self._ok(mid, {"protocolVersion": asked if asked in PROTOCOLS else PROTOCOLS[0],
@@ -81,8 +81,9 @@ class Server:
             name = params.get("name")
             if name not in {t["name"] for t in TOOLS}:
                 return {"jsonrpc": "2.0", "id": mid, "error": {"code": -32602, "message": f"unknown tool {name}"}}
+            args = params.get("arguments") if isinstance(params.get("arguments"), dict) else {}
             try:
-                data = self.call(name, params.get("arguments") or {})
+                data = self.call(name, args)
             except Exception as e:      # a tool error is an answer, not a crash
                 if not isinstance(e, ValueError):
                     traceback.print_exc(file=sys.stderr)

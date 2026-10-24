@@ -32,7 +32,7 @@ def _turns(job):
     name, f = job
     try:
         return list(ADAPTERS[name].turns(f))
-    except (OSError, UnicodeDecodeError):
+    except Exception:          # one unreadable file never stops the rest
         return []
 
 

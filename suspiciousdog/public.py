@@ -5,7 +5,10 @@ directories, plugins from public marketplaces. Everything else (your own skills,
 a private plugin, any file path) stays home, and is counted only as "private items: N". A test guards it.
 """
 
+import json
+import os
 import re
+from pathlib import Path
 
 # Built-in tools of the agents we read, by their own names.
 TOOLS = {
@@ -26,7 +29,8 @@ MCP = {
     "intercom", "jira", "linear", "memory", "monday", "neon", "notion", "paypal", "playwright", "postgres",
     "puppeteer", "sentry", "sequentialthinking", "slack", "square", "stripe", "supabase", "vercel", "zapier",
 }
-MARKETPLACES = {"claude-plugins-official", "anthropic-agent-skills", "claude-code-plugins", "anthropics"}
+# Marketplaces by where they come from, not by name: anyone can call a private marketplace "claude-plugins-official".
+REPOS = {"anthropics/claude-plugins-official", "anthropics/claude-code", "anthropics/skills"}
 # Skills that ship with Claude Code or claude.ai. A skill of yours never matches: these are the vendor's names.
 SKILLS = {
     "simplify", "code-review", "init", "security-review", "loop", "schedule", "claude-api", "update-config",
@@ -59,13 +63,24 @@ def key(it):
     if kind == "skill":
         if name.startswith("anthropic-skills:") and name.split(":", 1)[1] in CLAUDE_AI_SKILLS:
             return f"skill:{name}"
-        return f"skill:{name}" if name in SKILLS else None
+        return f"skill:{name}" if name in SKILLS and it.origin.get("builtin") else None
     if kind == "plugin":
         m = re.search(r"plugin ([^@\s]+)@([^,\s]+)", it.origin.get("source", ""))
-        if m and m.group(1) == name and m.group(2) in MARKETPLACES and re.fullmatch(r"[a-z0-9-]{2,40}", name):
-            return f"plugin:{name}@{m.group(2)}"
+        repo = _repos().get(m.group(2)) if m else None
+        if m and m.group(1) == name and repo in REPOS and re.fullmatch(r"[a-z0-9-]{2,40}", name):
+            return f"plugin:{name}@{repo}"
         return None
     return None
+
+
+def _repos():
+    """{marketplace name: the GitHub repo it was added from}, from Claude Code's own list."""
+    root = Path(os.environ.get("CLAUDE_CONFIG_DIR", Path.home() / ".claude"))
+    try:
+        data = json.loads((root / "plugins" / "known_marketplaces.json").read_text())
+    except (OSError, ValueError):
+        return {}
+    return {name: (m.get("source") or {}).get("repo") for name, m in data.items() if isinstance(m, dict)}
 
 
 def allowed(public_key):
@@ -80,6 +95,6 @@ def allowed(public_key):
     if kind == "skill":
         return name in SKILLS or (name.startswith("anthropic-skills:") and name.split(":", 1)[1] in CLAUDE_AI_SKILLS)
     if kind == "plugin":
-        plugin, _, market = name.partition("@")
-        return market in MARKETPLACES and bool(re.fullmatch(r"[a-z0-9-]{2,40}", plugin))
+        plugin, _, repo = name.partition("@")
+        return repo in REPOS and bool(re.fullmatch(r"[a-z0-9-]{2,40}", plugin))
     return False

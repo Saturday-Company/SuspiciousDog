@@ -61,7 +61,7 @@ def proposals(items, sessions):
     mine, yours = [], []
     light = {it.key for it in cheap(items, sessions)}
     for it in items.values():
-        if it.verdict not in VERDICTS or it.origin.get("builtin") or it.key in light or it.origin.get("pruned"):
+        if it.verdict not in VERDICTS or it.origin.get("builtin") or it.key in light:
             continue
         if it.origin.get("source", "").endswith(", disabled"):
             continue

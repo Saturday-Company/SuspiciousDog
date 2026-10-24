@@ -92,6 +92,7 @@ def _call(p):
             args = json.loads(p.get("arguments") or "{}")
         except ValueError:
             args = {}
+        args = args if isinstance(args, dict) else {}
         command = args.get("cmd") or args.get("command") or ""
         if isinstance(command, list):
             command = " ".join(command)
@@ -249,6 +250,7 @@ def kit(path):
                         args = json.loads(p.get("arguments") or "{}")
                     except ValueError:
                         args = {}
+                    args = args if isinstance(args, dict) else {}
                     key, tool = "skill:" + str(args.get("name") or args.get("skill") or "?"), call.tool
                 else:
                     m = SKILL_FILE.search(call.detail)

@@ -72,14 +72,14 @@ def turns(path):
                 agent = r.get("agent", agent)
                 session = str(r.get("id", session))
                 project = r.get("project") or Path(r.get("cwd", "") or project).name
-            elif kind == "user" and str(r.get("text", "")).strip():
+            elif kind == "user" and isinstance(r.get("text"), str) and r["text"].strip():
                 if current:
                     current.reply = r["text"].strip()
                     yield current
                 current = Turn(agent, session, project, _when(r.get("ts")), r["text"].strip())
             elif current is None:
                 continue
-            elif kind == "assistant" and str(r.get("text", "")).strip():
+            elif kind == "assistant" and isinstance(r.get("text"), str) and r["text"].strip():
                 current.texts.append(r["text"])
             elif kind == "tool_call":
                 cat = r.get("category") if r.get("category") in CATEGORIES else OTHER
@@ -109,8 +109,8 @@ def kit(path):
                 continue
             kind = r.get("type")
             if r.get("ts"):
-                k["start"] = k["start"] or r["ts"]
-                k["end"] = r["ts"]
+                k["start"] = k["start"] or str(r["ts"])
+                k["end"] = str(r["ts"])
             if kind == "session":
                 k["agent"] = r.get("agent", k["agent"])
                 k["session"] = str(r.get("id", k["session"]))

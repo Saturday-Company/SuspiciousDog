@@ -147,6 +147,13 @@ class Mcp(unittest.TestCase):
         self.assertIn("error", replies[3])
         self.assertTrue(replies[4]["result"]["isError"])
 
+    def test_odd_params(self):
+        server = mcp_server.Server(FakeState())
+        self.assertIn("error", server.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": [1]}))
+        r = server.handle({"jsonrpc": "2.0", "id": 2, "method": "tools/call",
+                           "params": {"name": "evidence", "arguments": "gamma"}})
+        self.assertTrue(r["result"]["isError"])
+
     def test_serve_reads_lines(self):
         stdin = io.StringIO('{"jsonrpc":"2.0","id":1,"method":"ping"}\nnot json\n')
         out = io.StringIO()
@@ -187,6 +194,17 @@ class Hooks(unittest.TestCase):
         self.assertEqual(list(d["hooks"]), ["Stop"])    # only ours are removed
         self.assertEqual([e["action"] for e in journal.read()], ["hook", "hook", "undo", "hook"])
         self.assertTrue(list((journal.home() / "attic").glob("settings.json.*")))
+
+    def test_symlinked_settings_keep_link_and_mode(self):
+        real = Path(self.tmp.name) / "dotfiles-settings.json"
+        real.write_text(self.settings.read_text())
+        real.chmod(0o600)
+        self.settings.unlink()
+        self.settings.symlink_to(real)
+        hooks.on("brief")
+        self.assertTrue(self.settings.is_symlink())
+        self.assertEqual(real.stat().st_mode & 0o777, 0o600)
+        self.assertIn("brief --hook", real.read_text())
 
     def test_brief_hook_reads_the_copy(self):
         brief.save("From 400 turns: - something", {"turns": 400})

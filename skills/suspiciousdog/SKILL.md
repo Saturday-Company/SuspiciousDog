@@ -15,7 +15,7 @@ Benjamini-Hochberg correction.
 
 Inside the Claude Code plugin:
 
-    PYTHONPATH="${CLAUDE_PLUGIN_ROOT}" python3 -m suspiciousdog <command>
+    python3 -I "${CLAUDE_PLUGIN_ROOT}/scripts/run.py" <command>
 
 Anywhere else, if installed: `sdog <command>`. Commands:
 

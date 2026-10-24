@@ -36,8 +36,10 @@ def command():
     found = shutil.which("sdog")
     if found:
         return shlex.quote(found)
-    root = Path(__file__).resolve().parent.parent
-    return f"PYTHONPATH={shlex.quote(str(root))} {shlex.quote(sys.executable)} -m suspiciousdog"
+    run = Path(__file__).resolve().parent.parent / "scripts" / "run.py"
+    if run.exists():        # the plugin's copy: -I keeps the session's folder off the import path
+        return f"{shlex.quote(sys.executable)} -I {shlex.quote(str(run))}"
+    return f"{shlex.quote(sys.executable)} -m suspiciousdog"
 
 
 def _read():
@@ -49,14 +51,18 @@ def _read():
 
 
 def _write(settings):
-    p = settings_path()
+    """Write through a symlink (dotfiles), keep the file's permissions, keep a copy of the old one."""
+    p = settings_path().resolve()
+    mode = p.stat().st_mode & 0o777 if p.exists() else 0o600
     if p.exists():
         backup = journal.home() / "attic" / f"settings.json.{int(time.time())}"
         backup.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(p, backup)
+        os.chmod(backup, 0o600)          # it can hold tokens
     p.parent.mkdir(parents=True, exist_ok=True)
-    tmp = p.with_suffix(".json.sdog")
+    tmp = p.with_name(p.name + ".sdog")
     tmp.write_text(json.dumps(settings, indent=2, ensure_ascii=False) + "\n")
+    os.chmod(tmp, mode)
     tmp.replace(p)
 
 
@@ -121,11 +127,8 @@ def off(feature, record=True):
 def detach(*args):
     """Run sdog in the background and return at once: a hook must never make the session wait."""
     cmd = shlex.split(command()) + list(args)
-    env = dict(os.environ)
-    if cmd and cmd[0].startswith("PYTHONPATH="):
-        env["PYTHONPATH"] = cmd.pop(0).split("=", 1)[1]
     try:
         subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                         start_new_session=True, env=env)
+                         start_new_session=True, cwd=str(Path.home()))
     except OSError:
         pass

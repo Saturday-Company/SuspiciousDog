@@ -1,26 +1,24 @@
 name: pack
-# Adds up every shared result (issues labelled "results") and publishes the pack page on GitHub Pages.
-# Nothing is published until there is at least one valid share.
+# Adds up every shared result (open issues labelled "results") and publishes the pack page on GitHub Pages.
+# Nothing goes public before the first valid share; once the page is up, it follows the shares, down to zero too.
 on:
   issues:
-    types: [opened, edited, labeled, unlabeled, closed, reopened]
+    types: [opened, edited, labeled, unlabeled, closed, reopened, deleted]
   workflow_dispatch:
   schedule:
     - cron: "17 6 * * 1"
 permissions:
   contents: read
   issues: read
-  pages: write
-  id-token: write
 concurrency:
   group: pages
   cancel-in-progress: false
 jobs:
   build:
-    if: github.event_name != 'issues' || contains(github.event.issue.labels.*.name, 'results')
     runs-on: ubuntu-latest
     outputs:
       shares: ${{ steps.pack.outputs.shares }}
+      up: ${{ steps.live.outputs.up }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,17 +27,31 @@ jobs:
       - name: Collect the shares
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh api --paginate "repos/${{ github.repository }}/issues?labels=results&state=all&per_page=100" --jq '.[]' > issues.jsonl
+          REPO: ${{ github.repository }}
+        run: gh api --paginate "repos/$REPO/issues?labels=results&state=open&per_page=100" --jq '.[]' > issues.jsonl
       - id: pack
         run: python scripts/pack.py issues.jsonl site
-      - if: steps.pack.outputs.shares != '0'
+      - id: live
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          if gh api "repos/$REPO/pages" > /dev/null 2>&1 && gh api "repos/$REPO/deployments?environment=github-pages" --jq 'length' | grep -qv '^0$'; then
+            echo "up=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "up=no" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.pack.outputs.shares != '0' || steps.live.outputs.up == 'yes'
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
   deploy:
     needs: build
-    if: needs.build.outputs.shares != '0'
+    if: needs.build.outputs.shares != '0' || needs.build.outputs.up == 'yes'
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
