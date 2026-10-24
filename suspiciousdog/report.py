@@ -11,7 +11,7 @@ VERDICT_NOTE = {
     "ballast": "loaded, never used", "rare": "used in under 5% of the sessions that load it",
     "elsewhere": "used in one project only", "misused": "fails far more often than your other tools",
     "earns": "earns its place", "new": "too new to judge", "fixed": "built in", "weight": "instruction file",
-    "hook": "hook", "builtin": "built-in tool",
+    "hook": "hook", "builtin": "built-in tool", "pruned": "taken out with sdog",
 }
 
 CSS = """
@@ -39,7 +39,7 @@ th,td{padding:7px 9px;text-align:left;border-bottom:1px solid var(--line);white-
 position:sticky;top:0;background:var(--card);user-select:none}td.n,th.n{text-align:right;
 font-variant-numeric:tabular-nums}td.name{white-space:normal;word-break:break-all;min-width:160px}
 .v{font-weight:600}.v-ballast,.v-misused{color:var(--bad)}.v-rare,.v-elsewhere{color:var(--warn)}
-.v-earns{color:var(--good)}.v-new,.v-fixed,.v-weight,.v-hook,.v-builtin{color:var(--mute);font-weight:400}
+.v-earns{color:var(--good)}.v-new,.v-fixed,.v-weight,.v-hook,.v-builtin,.v-pruned{color:var(--mute);font-weight:400}
 .fail{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0}
 .fail code{font-size:12px;color:var(--mute);display:block;white-space:pre-wrap;word-break:break-word;margin-top:3px}
 footer{margin-top:40px;font-size:12px;color:var(--mute)}
@@ -102,7 +102,8 @@ def _result(c, min_after):
 def build(kits, items, summary, changes, journal_changes, habits, min_after):
     e = escape
     rows = sorted(items.values(), key=lambda it: (-(it.chars * it.loaded), -it.calls))
-    verdicts = [v for v in ("ballast", "rare", "elsewhere", "misused", "earns", "new", "fixed", "weight", "hook")
+    verdicts = [v for v in ("ballast", "rare", "elsewhere", "misused", "earns", "new", "fixed", "weight", "hook",
+                            "pruned")
                 if any(it.verdict == v for it in rows)]
     used = sum(1 for it in rows if it.used and it.kind not in ("tool", "instructions"))
     listed = sum(1 for it in rows if it.kind not in ("tool", "instructions"))

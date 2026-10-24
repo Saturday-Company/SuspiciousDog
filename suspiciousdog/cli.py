@@ -158,15 +158,19 @@ def cmd_before_after(args):
 
 
 def cmd_share(args):
+    from . import kit
     turns, per_agent = _load(args)
-    data = share.payload(lab.sniff(turns), turns, per_agent)
+    kits = kit.scan(args.agent, args.path, args.project)
+    items = _ledger(kits) if kits else None
+    data = share.payload(lab.sniff(turns), turns, per_agent, items, kit.summary(kits, items) if kits else None)
     share.validate(data)
     if args.save:
         Path(args.save).write_text(json.dumps(data, indent=1) + "\n")
         print(f"  Saved {args.save}. Nothing left your machine.")
         return
     print("\n  This is everything that would be shared. Counts and our own factor names. No prompts, no replies,")
-    print("  no paths, no project names. It goes to a public GitHub issue, under your account.\n")
+    print("  no paths, no project names. From the kit, only public names (built-in tools, public MCP servers and")
+    print("  plugins); your own skills and files are one number. It goes to a public GitHub issue, under your account.\n")
     print(json.dumps(data, indent=1))
     if not args.yes:
         if input("\n  Open the issue? [y/N] ").strip().lower() not in ("y", "yes"):

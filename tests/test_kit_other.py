@@ -96,3 +96,43 @@ class Config(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ShareV2(unittest.TestCase):
+    """Format 2 carries kit counts, and never a private name."""
+
+    def test_private_names_stay_home(self):
+        from suspiciousdog import share
+        loaded = {"skill:preventivo-saturday": 300, "mcp:claude_ai_AcmeCRM": 500, "mcp:my_secret_db": 200,
+                  "plugin:secret": 100, "instructions:/home/u/acme/CLAUDE.md": 900, "subagent:acme-reviewer": 50,
+                  "mcp:claude_ai_Gamma": 600, "skill:anthropic-skills:pdf": 100, "skill:anthropic-skills:mine": 90,
+                  "skill:simplify": 40}
+        used = {"tool:Bash": 10, "tool:acme_internal_tool": 3, "mcp:claude_ai_Gamma": 1}
+        kits = [{"agent": "claude-code", "session": f"s{i}", "project": "/home/u/acme", "start": "2026-10-01",
+                 "base_tokens": 1000, "loaded": loaded, "used": used, "errors": {}, "retries": {}, "denied": {},
+                 "samples": {}, "attachments": {}} for i in range(25)]
+
+        def origin(key, installed):
+            if key == "plugin:secret":
+                return {"source": "plugin secret@acme-market, installed 2026-09-01"}
+            return {"builtin": True} if key == "skill:simplify" else {}
+        items = kit.ledger(kits, {}, origin)
+        data = share.payload({}, [], {"claude-code": 25}, items, kit.summary(kits, items))
+        self.assertTrue(share.validate(data))
+        names = {row[0] for row in data["kit"]["items"]}
+        self.assertEqual(names, {"mcp:gamma", "skill:anthropic-skills:pdf", "skill:simplify", "tool:Bash"})
+        text = str(data).lower()
+        for secret in ("preventivo", "acme", "secret", "claude.md", "/home", "mine"):
+            self.assertNotIn(secret, text)
+        self.assertGreaterEqual(data["kit"]["private_items"], 6)
+
+    def test_validate_rejects_a_private_name(self):
+        from suspiciousdog import share
+        data = {"suspiciousdog": "0.2.0", "agents": {}, "turns": 0, "days": 0, "results": [], "format": 2,
+                "kit": {"sessions": 1, "context_tokens": 1, "ballast_tokens": 0, "private_items": 0,
+                        "items": [["skill:preventivo-saturday", 1, 0, 0, 0, 10]]}}
+        with self.assertRaises(AssertionError):
+            share.validate(data)
+        data["kit"]["items"] = [["plugin:secret@acme-market", 1, 0, 0, 0, 10]]
+        with self.assertRaises(AssertionError):
+            share.validate(data)
