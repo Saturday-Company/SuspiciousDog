@@ -26,7 +26,7 @@ class Detection(unittest.TestCase):
 
     def test_load_a_mixed_folder(self):
         found, per_agent = load(path=FIXTURES)
-        self.assertEqual(per_agent, {"claude-code": 2, "codex": 2, "gemini": 1, "aider": 1})
+        self.assertEqual(per_agent, {"claude-code": 2, "codex": 3, "gemini": 2, "aider": 2})   # with kit-other/
         self.assertTrue(all(t.request for t in found))
 
 

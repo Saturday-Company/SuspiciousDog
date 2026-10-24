@@ -10,7 +10,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-from ..model import EDIT, SHELL, Event, Turn
+from ..model import EDIT, SHELL, Event, Turn, blank_kit, home_path
 
 NAME = "aider"
 STATUS = "beta"
@@ -140,3 +140,49 @@ def turns(path):
             yield done
     if current:
         yield current
+
+
+# --- the kit: read-only files (conventions) and models, per chat ---
+
+READ_ONLY = re.compile(r"^> Added (.+?) to (?:the chat \(read-only\)|read-only files)\.\s*$")
+MODEL = re.compile(r"^> (?:Main model|Model): (\S+)")
+TOKENS = re.compile(r"^> Tokens: ([\d.]+)(k?) sent")
+
+
+def kit(path):
+    """One kit per chat in the file. Aider records which files were added read-only (conventions) and the model;
+    nothing about what was used, so read-only files can't be judged, only weighed."""
+    path = Path(path)
+    kits, k = [], None
+    with open(path, errors="replace") as f:
+        for n, line in enumerate(f):
+            line = line.rstrip("\n")
+            m = STARTED.match(line)
+            if m:
+                k = blank_kit(NAME, f"{path.stem}-{len(kits) + 1}", home_path(path.parent))
+                k["start"] = k["end"] = datetime.strptime(m.group(1), "%Y-%m-%d %H:%M:%S").astimezone().isoformat()
+                kits.append(k)
+                continue
+            if k is None:
+                continue
+            m = READ_ONLY.match(line)
+            if m:
+                file = path.parent / m.group(1)
+                try:
+                    chars = len(file.read_text(errors="replace"))
+                except OSError:
+                    chars = 0
+                k["loaded"]["instructions:" + home_path(file)] = chars
+                k["attachments"]["read_only"] = k["attachments"].get("read_only", 0) + 1
+            m = MODEL.match(line)
+            if m:
+                k["models"][m.group(1)] = k["models"].get(m.group(1), 0) + 1
+            m = TOKENS.match(line)
+            if m and k["base_tokens"] is None:
+                k["base_tokens"] = round(float(m.group(1)) * (1000 if m.group(2) else 1))
+    return kits
+
+
+def kit_stamp(path):
+    st = Path(path).stat()
+    return f"{st.st_mtime_ns}:{st.st_size}"

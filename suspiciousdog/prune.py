@@ -94,16 +94,17 @@ def proposals(items, sessions):
 def describe(fix):
     """The exact command or move, for the user to read before saying yes."""
     if fix["type"] == "run":
-        return "$ " + " ".join([claude(), *fix["argv"]])[:160]
+        return "$ " + " ".join([fix.get("bin") or claude(), *fix["argv"]])[:160]
     home = str(Path.home())
     return "mv " + " → ".join(p.replace(home, "~", 1) for p in (fix["from"], fix["to"]))
 
 
-def _run(argv):
+def _run(argv, binary=None):
+    binary = binary or claude()
     try:
-        done = subprocess.run([claude(), *argv], capture_output=True, text=True, timeout=60)
+        done = subprocess.run([binary, *argv], capture_output=True, text=True, timeout=60)
     except (OSError, subprocess.TimeoutExpired) as e:
-        raise RuntimeError(f"couldn't run {claude()}: {e}")
+        raise RuntimeError(f"couldn't run {binary}: {e}")
     if done.returncode != 0:
         raise RuntimeError((done.stderr or done.stdout or f"exit {done.returncode}").strip()[:300])
 
@@ -122,8 +123,8 @@ def apply(p):
     """Do it, then write it down with its undo."""
     fix = p.fix
     if fix["type"] == "run":
-        _run(fix["argv"])
-        undo = {"type": "run", "argv": fix["undo"]}
+        _run(fix["argv"], fix.get("bin"))
+        undo = {"type": "run", "argv": fix["undo"], "bin": fix.get("bin")}
     else:
         _move(fix["from"], fix["to"])
         undo = {"type": "move", "from": fix["to"], "to": fix["from"]}
@@ -137,7 +138,7 @@ def undo(entry):
     if entry["id"] in journal.undone():
         raise RuntimeError(f"entry {entry['id']} was already undone")
     if u["type"] == "run":
-        _run(u["argv"])
+        _run(u["argv"], u.get("bin"))
     elif u["type"] == "hooks":
         from . import hooks
         hooks.off(u["off"], record=False) if u.get("off") else hooks.on(u["on"], record=False)

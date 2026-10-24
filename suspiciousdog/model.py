@@ -3,6 +3,7 @@
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
 
 # Tool categories shared by every adapter, so factors work the same for any agent.
 EDIT, SHELL, READ, SEARCH, WEB, BROWSER, SUBAGENT, ASK, PLAN, SKILL, OTHER = (
@@ -79,3 +80,17 @@ class Turn:
             if e.category == READ and re.search(r"\.(png|jpe?g|webp|gif|pdf)$", e.detail, re.I):
                 return True
         return False
+
+
+def blank_kit(agent, session, project):
+    """The shape of one session's kit, the same for every agent (see kit.py)."""
+    return {"agent": agent, "session": session, "project": project, "start": None, "end": None, "version": None,
+            "base_tokens": None, "models": {}, "loaded": {}, "used": {}, "errors": {}, "retries": {}, "denied": {},
+            "samples": {}, "attachments": {}, "subagent_files": 0, "digests": {}, "subagent_models": {}, "tools": {},
+            "error_kinds": {}}
+
+
+def home_path(path):
+    home = str(Path.home())
+    path = str(path)
+    return "~" + path[len(home):] if path.startswith(home) else path

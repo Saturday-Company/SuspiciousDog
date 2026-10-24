@@ -13,6 +13,17 @@ from .adapters import claude_code, load
 from .failures import FIX
 
 
+def installed():
+    """What every agent has on disk, Claude Code first: {key: where it comes from, how to remove it}."""
+    from .adapters import ADAPTERS
+    found = {}
+    for adapter in ADAPTERS.values():
+        if hasattr(adapter, "config"):
+            for key, value in adapter.config().items():
+                found.setdefault(key, value)
+    return found
+
+
 def origin():
     """Where things come from, knowing what sdog itself took out (otherwise a skill in the attic looks built in)."""
     gone = prune.pruned()
@@ -22,6 +33,10 @@ def origin():
             e = gone[key]
             return {"source": f"taken out with sdog on {e['at'][:10]} (journal #{e['id']})", "remove": "",
                     "pruned": True}
+        ext = re.match(r"instructions:~/\.gemini/extensions/([^/]+)/", key)
+        if ext and key not in installed:
+            return {**installed.get("plugin:" + ext.group(1), {"source": f"Gemini CLI extension {ext.group(1)}",
+                                                               "remove": ""}), "plugin": ext.group(1)}
         found = claude_code.origin(key, installed)
         return {**found, "pruned": True} if key in gone or f"plugin:{found.get('plugin')}" in gone else found
     return find
@@ -56,7 +71,7 @@ class State:
 
     @cached_property
     def items(self):
-        return kit.ledger(self.kits, claude_code.config(), origin()) if self.kits else {}
+        return kit.ledger(self.kits, installed(), origin()) if self.kits else {}
 
     @cached_property
     def summary(self):
@@ -69,7 +84,7 @@ class State:
     @cached_property
     def changes(self):
         """(changes found in the transcripts, changes in the journal), both measured."""
-        found = timeline.changes(self.kits, claude_code.origin, claude_code.config()) if self.kits else []
+        found = timeline.changes(self.kits, claude_code.origin, installed()) if self.kits else []
         logged = journal_changes()
         timeline.measure(found + logged, self.turns, kits=self.kits)
         return found, logged

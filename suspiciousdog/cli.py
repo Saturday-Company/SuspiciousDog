@@ -225,11 +225,16 @@ SECTIONS = (
 )
 
 
+def _installed():
+    from .service import installed
+    return installed()
+
+
 def _ledger(kits):
     from . import kit
     from .adapters import claude_code
-    from .service import origin
-    return kit.ledger(kits, claude_code.config(), origin())
+    from .service import installed, origin
+    return kit.ledger(kits, installed(), origin())
 
 
 def _kit(args):
@@ -332,7 +337,7 @@ def cmd_kit(args):
         found.sort(key=lambda it: (needle not in (it.name.lower(), it.key.lower()), -(it.calls + it.loaded)))
         from . import timeline
         from .adapters import claude_code
-        mine = [c for c in timeline.changes(kits, claude_code.origin, claude_code.config()) if found[0].key in c.keys]
+        mine = [c for c in timeline.changes(kits, claude_code.origin, _installed()) if found[0].key in c.keys]
         _detail(found[0], mine)
         if len(found) > 1:
             print(_c("  Also matching: " + ", ".join(it.key for it in found[1:6]) + ("…" if len(found) > 6 else ""), "2"))
@@ -377,7 +382,7 @@ def cmd_kit(args):
         print(f"  Too new to judge: {len(new)} items, loaded in fewer than 20 sessions.")
     from . import timeline
     from .adapters import claude_code
-    recent = timeline.changes(kits, claude_code.origin, claude_code.config())[-3:]
+    recent = timeline.changes(kits, claude_code.origin, _installed())[-3:]
     if recent:
         print(f"\n  {_c('LATEST CHANGES', '1')}  (did they help? sdog timeline)")
         for c in reversed(recent):
@@ -414,7 +419,7 @@ def cmd_timeline(args):
     from . import timeline
     from .adapters import claude_code
     kits, _, _ = _kit(args)
-    found = timeline.changes(kits, claude_code.origin, claude_code.config())
+    found = timeline.changes(kits, claude_code.origin, _installed())
     if not found:
         print("\n  No changes I can see. Same kit from the first session to the last.\n")
         return
@@ -497,7 +502,7 @@ def cmd_checkup(args):
     agents = ", ".join(f"{a} {n}" for a, n in sorted(per_agent.items()))
     base = f" · {_n(s['base_tokens'])} tokens before you type" if s["base_tokens"] else ""
     line = f"{s['sessions']} sessions · {s['first']} → {s['last']}{base}" if kits else \
-        "The kit (what you load, use and break) is Claude Code only for now."
+        "No kit in these sessions (what you load, use and break): `sdog doctor` says why."
     print(DOG.format(v=__version__, line=line, extra=f"{_n(answered)} answered turns · {agents}"))
     rows = sorted(items.values(), key=lambda it: -(it.chars * it.loaded))
     pad = " " * 14
@@ -526,7 +531,7 @@ def cmd_checkup(args):
             head("MISUSED", line)
     if misused:
         print(_c(f"{pad}→ sdog kit {misused[0].name}", "2"))
-    found = timeline.changes(kits, claude_code.origin, claude_code.config())
+    found = timeline.changes(kits, claude_code.origin, _installed())
     logged = _journal_changes()
     timeline.measure(found + logged, turns, kits=kits)
     for i, c in enumerate(reversed(found[-3:])):
@@ -679,7 +684,7 @@ def cmd_report(args):
     from .adapters import claude_code
     kits, items, s = _kit(args)
     turns, _ = load(args.agent, args.path, args.project)
-    found = timeline.changes(kits, claude_code.origin, claude_code.config())
+    found = timeline.changes(kits, claude_code.origin, _installed())
     logged = _journal_changes()
     timeline.measure(found + logged, turns, kits=kits)
     tables = lab.sniff(turns)
@@ -863,10 +868,15 @@ def cmd_doctor(args):
     from . import kit
     from .adapters import claude_code
     print()
+    blind = {"codex": "the kit can't see MCP servers you never used: Codex doesn't record them",
+             "gemini": "the kit can't see skills or MCP servers you never used, only GEMINI.md and server notes",
+             "aider": "the kit has read-only files (conventions) and models, nothing about use"}
     for name, a in ADAPTERS.items():
         paths = a.default_paths()
         reads = "turns + kit" if hasattr(a, "kit") else "turns"
         print(f"  {_c(name, '1'):<12} {a.STATUS:<7} {len(paths):>5} session files   reads: {reads}")
+        if name in blind and paths:
+            print(_c(f"               {blind[name]}", "2"))
     kits = kit.scan("claude-code", cache=not args.no_cache)
     if kits:
         def coverage(group):

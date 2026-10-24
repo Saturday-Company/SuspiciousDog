@@ -17,7 +17,7 @@ from pathlib import Path
 from .adapters import ADAPTERS, sessions
 from .stats import fisher
 
-SCAN_VERSION = 9       # bump whenever an adapter reads kits differently
+SCAN_VERSION = 10      # bump whenever an adapter reads kits differently
 MIN_SESSIONS = 20       # below this, "too new to judge"
 RARE = 0.05             # used in under 5% of the sessions that load it
 CHARS_PER_TOKEN = 4     # an estimate, and always shown as one
@@ -90,7 +90,7 @@ def scan(agent=None, path=None, project=None, cache=True):
         if k is None:
             todo.append((adapter.NAME, f, stamp))
         else:
-            kits.append(k)
+            kits.extend(k if isinstance(k, list) else [k])       # Aider keeps many chats in one file
     if todo:
         jobs = [(name, f) for name, f, _ in todo]
         try:
@@ -100,7 +100,7 @@ def scan(agent=None, path=None, project=None, cache=True):
             fresh = [_read(job) for job in jobs]
         for (_, f, stamp), k in zip(todo, fresh):
             store.put(f, stamp, k)
-            kits.append(k)
+            kits.extend(k if isinstance(k, list) else [k])
     store.close()
     return sorted((k for k in kits if k["start"] and (k["base_tokens"] is not None or k["used"])),
                   key=lambda k: k["start"])
