@@ -68,7 +68,7 @@ def _write(settings):
 
 def _ours(hook, tail):
     cmd = str(hook.get("command", "")) if isinstance(hook, dict) else ""
-    return cmd.endswith(tail) and ("sdog" in cmd or "suspiciousdog" in cmd)
+    return cmd.endswith(tail) and any(mark in cmd.lower() for mark in ("sdog", "suspiciousdog", "scripts/run.py"))
 
 
 def status():
